@@ -48,6 +48,9 @@ def get_engine(engine_name: str, **kwargs) -> EngineLM:
     elif "gemini" in engine_name:
         from .gemini import ChatGemini
         return ChatGemini(model_string=engine_name, **kwargs)
+    elif "llama-3" in engine_name:
+        from .llama3_1 import ChatLlama3_1
+        return ChatLlama3_1(model_string="meta-llama/Meta-Llama-3.1-8B-Instruct", **kwargs)
     elif "together" in engine_name:
         from .together import ChatTogether
         engine_name = engine_name.replace("together-", "")
