@@ -50,7 +50,10 @@ You are a helpful assistant"""
                 inputs = []
                 while len(inputs) < self.batch_size:
                     try:
-                        item = self.queue.get(timeout=10)
+                        if len(inputs) == 0:
+                            item = self.queue.get()
+                        else:
+                            item = self.queue.get(timeout=10)
                         inputs.append(item)
                     except Empty:
                         print("Timeout waiting for batch items.")
@@ -94,14 +97,14 @@ You are a helpful assistant"""
         batch_thread.start()
 
     def generate(self, content: Union[str, List[Union[str, bytes]]], system_prompt: str = None, **kwargs):
-        cache_or_none = self._check_cache(sys_prompt_arg + prompt)
+        cache_or_none = self._check_cache(system_prompt + prompt)
         if cache_or_none is not None:
             return cache_or_none
 
         result_queue = Queue()
         self.queue.put((content, system_prompt, result_queue))
         response = result_queue.get()
-        self._save_cache(sys_prompt_arg + prompt, response)
+        self._save_cache(system_prompt + prompt, response)
         return response
 
     def __call__(self, prompt, **kwargs):
