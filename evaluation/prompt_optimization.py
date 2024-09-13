@@ -103,7 +103,7 @@ model = tg.BlackboxLLM(llm_api, system_prompt)
 if args.optimizer_version == "v1":
     optimizer = tg.TextualGradientDescent(engine=llm_api, parameters=[system_prompt])
 elif args.optimizer_version == "v2":
-    optimizer = tg.TextualGradientDescentV2(engine=llm_api, parameters=[system_prompt])
+    optimizer = tg.TextualGradientDescent_v2(engine=llm_api, parameters=[system_prompt])
 else:
     raise ValueError(f"Invalid optimizer version: {args.optimizer_version}")
 
