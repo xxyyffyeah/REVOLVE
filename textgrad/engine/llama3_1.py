@@ -50,8 +50,11 @@ You are a helpful assistant"""
                 inputs = []
                 while len(inputs) < self.batch_size:
                     try:
-                        item = self.queue.get()
+                        item = self.queue.get(timeout=10)
                         inputs.append(item)
+                    except Empty:
+                        print("Timeout waiting for batch items.")
+                        break
                     except Exception as e:
                         print(f"Error in batch processing: {e}")
 
