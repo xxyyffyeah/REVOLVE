@@ -97,14 +97,14 @@ You are a helpful assistant"""
         batch_thread.start()
 
     def generate(self, content: Union[str, List[Union[str, bytes]]], system_prompt: str = None, **kwargs):
-        cache_or_none = self._check_cache(system_prompt + prompt)
+        cache_or_none = self._check_cache(system_prompt + content)
         if cache_or_none is not None:
             return cache_or_none
 
         result_queue = Queue()
         self.queue.put((content, system_prompt, result_queue))
         response = result_queue.get()
-        self._save_cache(system_prompt + prompt, response)
+        self._save_cache(system_prompt + content, response)
         return response
 
     def __call__(self, prompt, **kwargs):
