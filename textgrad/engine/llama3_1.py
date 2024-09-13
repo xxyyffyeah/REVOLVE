@@ -76,8 +76,8 @@ You are a helpful assistant"""
                     with torch.no_grad():
                         outputs = self.model.generate(
                             **inputs,
-                            max_new_tokens=10000,
-                            temperature=0,
+                            max_new_tokens=2000,
+                            temperature=1e-6,
                             top_p=0.99,
                             pad_token_id=self.tokenizer.pad_token_id,
                         )
@@ -91,9 +91,15 @@ You are a helpful assistant"""
         batch_thread.start()
 
     def generate(self, content: Union[str, List[Union[str, bytes]]], system_prompt: str = None, **kwargs):
+        cache_or_none = self._check_cache(sys_prompt_arg + prompt)
+        if cache_or_none is not None:
+            return cache_or_none
+
         result_queue = Queue()
         self.queue.put((content, system_prompt, result_queue))
-        return result_queue.get()
+        response = result_queue.get()
+        self._save_cache(sys_prompt_arg + prompt, response)
+        return response
 
     def __call__(self, prompt, **kwargs):
         return self.generate(prompt, **kwargs)

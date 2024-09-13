@@ -65,14 +65,8 @@ def eval_dataset(test_set, eval_fn, model, max_samples: int=None):
 
 
 def run_validation_revert(system_prompt: tg.Variable, results, model, eval_fn, val_set):
-    if system_prompt.get_value() not in val_acc_cache:
-        print("Running the current prompt on the validation set...")
-        val_acc_list = eval_dataset(val_set, eval_fn, model)
-        val_acc_cache[system_prompt.get_value()] = val_acc_list
-        val_performance = np.mean(val_acc_list)
-    else:
-        print("Using cached value for the current prompt on the validation set...")
-        val_performance = np.mean(val_acc_cache[system_prompt.get_value()])
+    print("Running the current prompt on the validation set...")
+    val_performance = np.mean(eval_dataset(val_set, eval_fn, model))
     previous_performance = np.mean(results["validation_acc"][-1])
     print("Val acc: ", val_performance)
     print("Previous acc: ", previous_performance)
@@ -120,10 +114,6 @@ print("Evaluating the initial prompt on the validation set...")
 results["validation_acc"].append(eval_dataset(val_set, eval_fn, model))
 results["prompt"].append(system_prompt.get_value())
 
-# Cache the val/test accuracy for each system prompt
-val_acc_cache = {system_prompt.get_value(): results["validation_acc"][-1]}
-test_acc_cache = {system_prompt.get_value(): results["test_acc"][-1]}
-
 for epoch in range(args.max_epochs):
     for steps, (batch_x, batch_y) in enumerate((pbar := tqdm(train_loader, position=0))):
         pbar.set_description(f"Training step {steps}. Epoch {epoch}")
@@ -148,13 +138,8 @@ for epoch in range(args.max_epochs):
         if args.run_validation:
             run_validation_revert(system_prompt, results, model, eval_fn, val_set)
         print("Current sys prompt: ", system_prompt)
-        if system_prompt.get_value() not in test_acc_cache:
-            print("Evaluating the current prompt on the test set...")
-            test_acc = eval_dataset(test_set, eval_fn, model)
-            test_acc_cache[system_prompt.get_value()] = test_acc
-        else:
-            print("Using cached value for the current prompt on the test set...")
-            test_acc = test_acc_cache[system_prompt.get_value()]
+        print("Evaluating the current prompt on the test set...")
+        test_acc = eval_dataset(test_set, eval_fn, model)
         results["test_acc"].append(test_acc)
         results["prompt"].append(system_prompt.get_value())
         if steps == 12:
