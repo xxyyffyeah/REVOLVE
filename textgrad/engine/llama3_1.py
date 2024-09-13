@@ -1,7 +1,7 @@
 import os
 import torch
 import platformdirs
-from queue import Queue
+from queue import Queue, Empty
 from threading import Thread
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from typing import List, Union
