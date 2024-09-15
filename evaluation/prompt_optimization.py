@@ -123,7 +123,7 @@ for epoch in range(args.max_epochs):
         with concurrent.futures.ThreadPoolExecutor(max_workers=args.num_threads) as executor:
             futures = []
             for (x, y) in zip(batch_x, batch_y):
-                future = executor.submit(get_eval_ouput, x, y, model, eval_fn)
+                future = executor.submit(get_eval_output, x, y, model, eval_fn)
                 futures.append(future)
                 if len(futures) >= max_samples:
                     break
@@ -146,7 +146,7 @@ for epoch in range(args.max_epochs):
             break
 
 
-def get_eval_ouput(x, y, model, eval_fn):
+def get_eval_output(x, y, model, eval_fn):
     """
     Helper function to be used in the ThreadPoolExecutor to evaluate the model on a batch of data.
     """
