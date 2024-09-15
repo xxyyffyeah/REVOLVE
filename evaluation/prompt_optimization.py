@@ -161,5 +161,6 @@ for epoch in range(args.max_epochs):
 
 # Also dump the final results
 import json
-with open(f"./figures/results_{args.task}_{args.engine}_{args.optimizer_version}.json", "w") as f:
+os.makedirs("./results", exist_ok=True)
+with open(f"./results/results_{args.task}_{args.engine}_{args.optimizer_version}.json", "w") as f:
     json.dump(results, f)
