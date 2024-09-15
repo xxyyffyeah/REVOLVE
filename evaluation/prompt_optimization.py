@@ -141,8 +141,7 @@ for epoch in range(args.max_epochs):
             for (x, y) in zip(batch_x, batch_y):
                 future = executor.submit(get_eval_output, x, y, model, eval_fn)
                 futures.append(future)
-                if len(futures) >= max_samples:
-                    break
+
             tqdm_loader = tqdm(concurrent.futures.as_completed(futures), total=len(futures), position=0)
             for future in tqdm_loader:
                 eval_output_variable = future.result()
