@@ -80,6 +80,22 @@ def run_validation_revert(system_prompt: tg.Variable, results, model, eval_fn, v
     results["validation_acc"].append(val_performance)
 
 
+def get_eval_output(x, y, model, eval_fn):
+    """
+    Helper function to be used in the ThreadPoolExecutor to evaluate the model on a batch of data.
+    """
+    x = tg.Variable(x, requires_grad=False, role_description="query to the language model")
+    y = tg.Variable(y, requires_grad=False, role_description="correct answer for the query")
+    response = model(x)
+    try:
+        eval_output_variable = eval_fn(inputs=dict(prediction=response, ground_truth_answer=y))
+        return int(eval_output_variable.value)
+    except:
+        eval_output_variable = eval_fn([x, y, response])
+        eval_output_parsed = eval_fn.parse_output(eval_output_variable)
+        return int(eval_output_parsed)
+
+
 set_seed(args.seed)
 if 'llama' in args.engine:
     llm_api = tg.get_engine(engine_name=args.engine, batch_size=args.num_threads)
@@ -144,22 +160,6 @@ for epoch in range(args.max_epochs):
         results["prompt"].append(system_prompt.get_value())
         if steps == 12:
             break
-
-
-def get_eval_output(x, y, model, eval_fn):
-    """
-    Helper function to be used in the ThreadPoolExecutor to evaluate the model on a batch of data.
-    """
-    x = tg.Variable(x, requires_grad=False, role_description="query to the language model")
-    y = tg.Variable(y, requires_grad=False, role_description="correct answer for the query")
-    response = model(x)
-    try:
-        eval_output_variable = eval_fn(inputs=dict(prediction=response, ground_truth_answer=y))
-        return int(eval_output_variable.value)
-    except:
-        eval_output_variable = eval_fn([x, y, response])
-        eval_output_parsed = eval_fn.parse_output(eval_output_variable)
-        return int(eval_output_parsed)
 
 
 # Also dump the final results
