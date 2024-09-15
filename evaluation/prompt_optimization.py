@@ -89,11 +89,9 @@ def get_eval_output(x, y, model, eval_fn):
     response = model(x)
     try:
         eval_output_variable = eval_fn(inputs=dict(prediction=response, ground_truth_answer=y))
-        return int(eval_output_variable.value)
     except:
         eval_output_variable = eval_fn([x, y, response])
-        eval_output_parsed = eval_fn.parse_output(eval_output_variable)
-        return int(eval_output_parsed)
+    return eval_output_variable
 
 
 set_seed(args.seed)
