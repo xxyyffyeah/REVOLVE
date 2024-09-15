@@ -174,8 +174,15 @@ class TextualGradientDescent(Optimizer):
             try:
                 new_value = new_text.split(self.new_variable_tags[0])[1].split(self.new_variable_tags[1])[0].strip()
             except IndexError:
-                logger.error(f"TextualGradientDescent optimizer response could not be indexed", extra={"optimizer.response": new_text})
-                raise IndexError(f"TextualGradientDescent optimizer response could not be indexed. Try a stronger model or reduce context.")
+                logger.warning(f"First split attempt failed, trying <VARIABLE> and </VARIABLE> as fallback")
+                try:
+                    # Fallback to <VARIABLE> and </VARIABLE> tags
+                    new_value = new_text.split("<VARIABLE>")[1].split("</VARIABLE>")[0].strip()
+                except IndexError:
+                    logger.error(f"TextualGradientDescent optimizer response could not be indexed",
+                                 extra={"optimizer.response": new_text})
+                    raise IndexError(
+                        f"TextualGradientDescent optimizer response could not be indexed. Try a stronger model or reduce context.")
             parameter.set_value(new_value)
             logger.info(f"TextualGradientDescent updated text", extra={"parameter.value": parameter.value})
 
