@@ -1,7 +1,7 @@
 import os
 import torch
 import platformdirs
-from queue import Queue
+from queue import Queue, Empty
 from threading import Thread
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from typing import List, Union
@@ -31,11 +31,10 @@ You are a helpful assistant"""
 
         super().__init__(cache_path=cache_path)
 
-        self.api_key_llama = "put_your_token_here"
         self.system_prompt = system_prompt
-        self.tokenizer = AutoTokenizer.from_pretrained(model_string, token=self.api_key_llama, padding_side="left")
+        self.tokenizer = AutoTokenizer.from_pretrained(model_string, padding_side="left")
         self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
-        self.model = AutoModelForCausalLM.from_pretrained(model_string, token=self.api_key_llama, torch_dtype=torch.bfloat16, device_map="auto")
+        self.model = AutoModelForCausalLM.from_pretrained(model_string, torch_dtype=torch.bfloat16, device_map="auto")
 
         self.model_string = model_string
 
@@ -50,8 +49,14 @@ You are a helpful assistant"""
                 inputs = []
                 while len(inputs) < self.batch_size:
                     try:
-                        item = self.queue.get()
+                        if len(inputs) == 0:
+                            item = self.queue.get()
+                        else:
+                            item = self.queue.get(timeout=10)
                         inputs.append(item)
+                    except Empty:
+                        print("Timeout waiting for batch items.")
+                        break
                     except Exception as e:
                         print(f"Error in batch processing: {e}")
 
@@ -76,8 +81,8 @@ You are a helpful assistant"""
                     with torch.no_grad():
                         outputs = self.model.generate(
                             **inputs,
-                            max_new_tokens=10000,
-                            temperature=0,
+                            max_new_tokens=2000,
+                            temperature=1e-6,
                             top_p=0.99,
                             pad_token_id=self.tokenizer.pad_token_id,
                         )
@@ -91,9 +96,15 @@ You are a helpful assistant"""
         batch_thread.start()
 
     def generate(self, content: Union[str, List[Union[str, bytes]]], system_prompt: str = None, **kwargs):
+        cache_or_none = self._check_cache(system_prompt + content)
+        if cache_or_none is not None:
+            return cache_or_none
+
         result_queue = Queue()
         self.queue.put((content, system_prompt, result_queue))
-        return result_queue.get()
+        response = result_queue.get()
+        self._save_cache(system_prompt + content, response)
+        return response
 
     def __call__(self, prompt, **kwargs):
         return self.generate(prompt, **kwargs)
