@@ -31,11 +31,10 @@ You are a helpful assistant"""
 
         super().__init__(cache_path=cache_path)
 
-        self.api_key_llama = "put_your_token_here"
         self.system_prompt = system_prompt
-        self.tokenizer = AutoTokenizer.from_pretrained(model_string, token=self.api_key_llama, padding_side="left")
+        self.tokenizer = AutoTokenizer.from_pretrained(model_string, padding_side="left")
         self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
-        self.model = AutoModelForCausalLM.from_pretrained(model_string, token=self.api_key_llama, torch_dtype=torch.bfloat16, device_map="auto")
+        self.model = AutoModelForCausalLM.from_pretrained(model_string, torch_dtype=torch.bfloat16, device_map="auto")
 
         self.model_string = model_string
 
