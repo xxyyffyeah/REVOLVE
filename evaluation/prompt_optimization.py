@@ -156,7 +156,7 @@ for epoch in range(args.max_epochs):
         test_acc = eval_dataset(test_set, eval_fn, model)
         results["test_acc"].append(test_acc)
         results["prompt"].append(system_prompt.get_value())
-        if steps == 12:
+        if steps == 11:
             break
 
 
