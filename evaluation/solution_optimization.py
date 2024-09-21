@@ -114,7 +114,6 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=args.num_threads) as exec
         performance_history, predictions, question, answer = future.result()
         all_solutions[question] = {"predictions": [p.value for p in predictions], "answer": answer}
         all_history.append(performance_history)
-        print(performance_history)
 
 print(np.array(all_history).mean(axis=0))
 with open(f"./{args.task}_{args.optimizer_version}_predictions.json", "w") as f:
