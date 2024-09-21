@@ -6,7 +6,7 @@ import numpy as np
 import random
 
 # Set up the LM.
-turbo = dspy.HFModel(model='meta-llama/Meta-Llama-3.1-8B-Instruct', max_new_tokens=2000, temperature=1e-6, top_p=0.99)
+turbo = dspy.HFModel(model='meta-llama/Meta-Llama-3.1-8B-Instruct')
 dspy.settings.configure(lm=turbo)
 
 # Load math questions from the GSM8K dataset.
