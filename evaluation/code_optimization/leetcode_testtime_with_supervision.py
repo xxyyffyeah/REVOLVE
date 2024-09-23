@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 sys.path.append("../../textgrad")
 sys.path.append("../../")
 sys.path.append("../../textgrad/optimizer")
@@ -38,6 +39,13 @@ internal_evaluator = LeetCodeEvaluator()
 
 optimizer_version = args.optimizer_version
 
+def extract_model_size(engine_name):
+    match = re.search(r'(\d+B)', engine_name)
+    if match:
+        return match.group(1)
+    else:
+        return "Unknown"
+            
 def optimization_one_iteration(optimizer, instance_var, prompt, tests):
     pt = PythonEvaluator()
     tests = tests.split("\n")
@@ -206,6 +214,6 @@ if __name__ == "__main__":
 
         program_df = pd.DataFrame(collection)
 
-        program_df.to_csv(f"../results_haibo/leetcode_supervised_{TEST_ENGINE}_{optimizer_version}.csv", index=False)
+        program_df.to_csv(f"../results_haibo/leetcode_supervised_{extract_model_size(TEST_ENGINE)}_{optimizer_version}.csv", index=False)
         print("Saved~!")
 
