@@ -36,7 +36,7 @@ class LeetCodeEvaluator:
     :return:
     """
 
-    def __init__(self):
+    def __init__(self, test_engines="meta-llama/Meta-Llama-3.1-8B-Instruct"):
         configuration = leetcode.Configuration()
         leetcode_session = os.environ["LEETCODE_SESSION"]
         csrf_token = os.environ["LEETCODE_CSRF_TOKEN"]
@@ -49,7 +49,7 @@ class LeetCodeEvaluator:
         self.leet_code_cache = Cache("./cache_leetcode")
 
         self.api_instance = leetcode.DefaultApi(leetcode.ApiClient(configuration))
-        self.TEST_ENGINE = "llama-3_1"
+        self.TEST_ENGINE = test_engines
         self.ENGINE_API = get_engine(engine_name=self.TEST_ENGINE)
     def id_from_slug(self, slug: str) -> str:
         """
