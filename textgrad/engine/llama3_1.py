@@ -12,7 +12,7 @@ from .base import EngineLM, CachedEngine
 class ChatLlama3_1(EngineLM, CachedEngine):
     DEFAULT_SYSTEM_PROMPT = """
 Cutting Knowledge Date: December 2023
-Today Date: 23 July 2024
+Today Date: 22 September 2024
 
 You are a helpful assistant"""
 
@@ -27,7 +27,8 @@ You are a helpful assistant"""
         :param system_prompt:
         """
         root = platformdirs.user_cache_dir("textgrad")
-        cache_path = os.path.join(root, f"cache_openai_{model_string}.db")
+        model_name = model_string.split("/")[-1]
+        cache_path = os.path.join(root, f"cache_{model_name}.db")
 
         super().__init__(cache_path=cache_path)
 

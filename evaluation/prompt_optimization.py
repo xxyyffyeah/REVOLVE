@@ -18,7 +18,7 @@ def set_seed(seed):
 def config():
     parser = argparse.ArgumentParser(description="Optimize a prompt for a task.")
     parser.add_argument("--task", type=str, default="BBH_object_counting", help="The task to evaluate the model on.")
-    parser.add_argument("--engine", type=str, default="llama-3_1", help="The API to use.")
+    parser.add_argument("--engine", type=str, default="meta-llama/Meta-Llama-3.1-8B-Instruct", help="The API to use.")
     parser.add_argument("--optimizer_version", type=str, default="v1", help="The optimizer to use.")
     parser.add_argument("--batch_size", type=int, default=3, help="The batch size to use for training.")
     parser.add_argument("--max_epochs", type=int, default=1, help="The maximum number of epochs to train for.")
@@ -156,7 +156,7 @@ for epoch in range(args.max_epochs):
         test_acc = eval_dataset(test_set, eval_fn, model)
         results["test_acc"].append(test_acc)
         results["prompt"].append(system_prompt.get_value())
-        if steps == 12:
+        if steps == 11:
             break
 
 
