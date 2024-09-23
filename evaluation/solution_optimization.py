@@ -15,7 +15,7 @@ from textgrad.tasks import load_instance_task
 def config():
     parser = argparse.ArgumentParser(description="Optimize a prompt for a task.")
     parser.add_argument("--task", type=str, default="MMLU_machine_learning", help="The task to evaluate the model on.")
-    parser.add_argument("--engine", type=str, default="gpt-4o", help="The API to use for evaluation.")
+    parser.add_argument("--engine", type=str, default="meta-llama/Meta-Llama-3.1-8B-Instruct", help="The API to use.")
     parser.add_argument("--max_iterations", type=int, default=3, help="The maximum number of iterations of test-time updates.")
     parser.add_argument("--num_threads", type=int, default=16, help="The number of threads to use for evaluation.")
     parser.add_argument("--optimizer_version", type=str, default="v1", help="The optimizer version to use (v1 or v2).")
