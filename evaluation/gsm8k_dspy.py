@@ -1,12 +1,22 @@
 import dspy
+import argparse
 from dspy.datasets.gsm8k import GSM8K, gsm8k_metric
 from dspy.teleprompt import BootstrapFewShotWithRandomSearch
 from dspy.evaluate import Evaluate
 import numpy as np
 import random
 
+
+def config():
+    parser = argparse.ArgumentParser(description="Optimize a prompt for a task.")
+    parser.add_argument("--model", type=str, default="meta-llama/Meta-Llama-3.1-8B-Instruct", help="The identifier of the model to use or path to the model if it is a local model.")
+    return parser.parse_args()
+
+
+args = config()
+
 # Set up the LM.
-turbo = dspy.HFModel(model='meta-llama/Meta-Llama-3.1-8B-Instruct')
+turbo = dspy.HFModel(model=args.model)
 dspy.settings.configure(lm=turbo)
 
 # Load math questions from the GSM8K dataset.
