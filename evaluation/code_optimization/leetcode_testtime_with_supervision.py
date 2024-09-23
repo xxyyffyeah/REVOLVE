@@ -27,7 +27,7 @@ os.environ['LEETCODE_CSRF_TOKEN'] = "s3x2mv4JfokBwUrrMkbesPncqf9a3cSix5BNjfLJsJf
 
 def config():
     parser = argparse.ArgumentParser(description="Code optimization.")
-    parser.add_argument("--engine", type=str, default="llama-3_1", help="The API to use.")
+    parser.add_argument("--engine", type=str, default="meta-llama/Meta-Llama-3.1-8B-Instruct", help="The API to use.")
     parser.add_argument("--optimizer_version", type=str, default="v1", help="The optimizer to use.")
     parser.add_argument("--size", type=int, default=39, help="The number of total questions")
     return parser.parse_args()
