@@ -9,7 +9,7 @@ from textgrad.variable import Variable
 from textgrad import logger
 from textgrad.engine import EngineLM
 from textgrad.config import validate_engine_or_get_default
-from .optimizer_prompts_v2 import construct_tgd_prompt, OPTIMIZER_SYSTEM_PROMPT, GRADIENT_TEMPLATE, GRADIENT_MULTIPART_TEMPLATE
+from optimizer_prompts_v2 import construct_tgd_prompt, OPTIMIZER_SYSTEM_PROMPT, GRADIENT_TEMPLATE, GRADIENT_MULTIPART_TEMPLATE
 
 
 def get_gradient_and_context_text(variable) -> Union[str, List[Union[str, bytes]]]:
