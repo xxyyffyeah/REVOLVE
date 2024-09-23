@@ -1,0 +1,5 @@
+tqdm==4.66.5
+python-dotenv==1.0.1
+numpy==2.0.2
+pandas==2.2.3
+dspy-ai==2.4.17
