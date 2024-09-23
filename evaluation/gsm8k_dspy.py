@@ -59,7 +59,7 @@ overall_metric, results, individual_scores = evaluate(
 
 # Save the results.
 try:
-    with open("overall_metric.txt", "w") as f:
+    with open("./results/results_GSM8K_DSPy_dspy_overall_metric.txt", "w") as f:
         f.write(f"Overall Metric: {overall_metric}\n")
 
     results_df = pd.DataFrame([
@@ -71,12 +71,12 @@ try:
         for result in results
     ])
 
-    results_df.to_csv("evaluation_results.csv", index=False)
+    results_df.to_csv("./results/results_GSM8K_DSPy_dspy_evaluation_results.csv", index=False)
 
-    with open("individual_scores.json", "w") as f:
+    with open("./results/results_GSM8K_DSPy_dspy_individual_scores.json", "w") as f:
         json.dump(individual_scores, f)
 
-    pd.DataFrame(individual_scores, columns=["score"]).to_csv("individual_scores.csv", index=False)
+    pd.DataFrame(individual_scores, columns=["score"]).to_csv("./results/results_GSM8K_DSPy_dspy_individual_scores.csv", index=False)
 
     print("Evaluation results saved successfully.")
 except Exception as e:
