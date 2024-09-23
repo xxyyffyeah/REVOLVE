@@ -5,6 +5,8 @@ from dspy.teleprompt import BootstrapFewShotWithRandomSearch
 from dspy.evaluate import Evaluate
 import numpy as np
 import random
+import pandas as pd
+import json
 
 
 def config():
@@ -49,4 +51,33 @@ optimized_cot = teleprompter.compile(CoT(), trainset=gsm8k_trainset)
 evaluate = Evaluate(devset=gsm8k_testset, metric=gsm8k_metric, num_threads=4, display_progress=True, display_table=0)
 
 # Evaluate our `optimized_cot` program.
-evaluate(optimized_cot)
+overall_metric, results, individual_scores = evaluate(
+    optimized_cot,
+    return_all_scores=True,
+    return_outputs=True
+)
+
+# Save the results.
+try:
+    with open("overall_metric.txt", "w") as f:
+        f.write(f"Overall Metric: {overall_metric}\n")
+
+    results_df = pd.DataFrame([
+        {
+            'example': result[0],
+            'prediction': result[1],
+            'score': result[2]
+        }
+        for result in results
+    ])
+
+    results_df.to_csv("evaluation_results.csv", index=False)
+
+    with open("individual_scores.json", "w") as f:
+        json.dump(individual_scores, f)
+
+    pd.DataFrame(individual_scores, columns=["score"]).to_csv("individual_scores.csv", index=False)
+
+    print("Evaluation results saved successfully.")
+except Exception as e:
+    print(f"Failed to save evaluation results: {e}")
