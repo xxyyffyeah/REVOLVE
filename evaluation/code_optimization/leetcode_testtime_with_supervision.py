@@ -148,7 +148,8 @@ if __name__ == "__main__":
     for seed in SEEDS:
         instance_task = "LeetCodeHardEval"
 
-        TEST_ENGINE = "llama-3_1"
+        # TEST_ENGINE = "llama-3_1"
+        TEST_ENGINE = args.engine
         ENGINE_API = get_engine(engine_name=TEST_ENGINE)
 
         MAX_PROGRAMS_TO_OPTIMIZE = 39
