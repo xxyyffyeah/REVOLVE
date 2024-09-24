@@ -1,0 +1,3341 @@
+task_id,problem,seed,success,test_cases_passed,test_cases_total,runtime,local_tests,local_test_state,iteration_idx
+minimum-time-to-visit-a-cell-in-a-grid,"from collections import deque
+from typing import List
+
+def minimumTime(grid: List[List[int]]) -> int:
+    """"""
+    You are given a `m x n` matrix `grid` consisting of non-negative integers
+    where `grid[row][col]` represents the minimum time required to be able to
+    visit the cell `(row, col)`, which means you can visit the cell `(row, col)`
+    only when the time you visit it is greater than or equal to `grid[row][col]`.
+    
+    You are standing in the top-left cell of the matrix in the `0th` second, and
+    you must move to any adjacent cell in the four directions: up, down, left, and
+    right. Each move you make takes 1 second.
+    
+    Return the minimum time required in which you can visit the bottom-right cell
+    of the matrix. If you cannot visit the bottom-right cell, then return `-1`.
+    
+    Example 1:
+    
+    Input: grid = [[0,1,3,2],[5,1,2,5],[4,3,8,6]]
+    Output: 7
+    Explanation: One of the paths that we can take is the following:
+    - at t = 0, we are on the cell (0,0).
+    - at t = 1, we move to the cell (0,1). It is possible because grid[0][1] <= 1.
+    - at t = 2, we move to the cell (1,1). It is possible because grid[1][1] <= 2.
+    - at t = 3, we move to the cell (1,2). It is possible because grid[1][2] <= 3.
+    - at t = 4, we move to the cell (1,1). It is possible because grid[1][1] <= 4.
+    - at t = 5, we move to the cell (1,2). It is possible because grid[1][2] <= 5.
+    - at t = 6, we move to the cell (1,3). It is possible because grid[1][3] <= 6.
+    - at t = 7, we move to the cell (2,3). It is possible because grid[2][3] <= 7.
+    The final time is 7. It can be shown that it is the minimum time possible.
+    
+    Example 2:
+    
+    Input: grid = [[0,2,4],[3,2,1],[1,0,4]]
+    Output: -1
+    Explanation: There is no path from the top left to the bottom-right cell.
+    
+    Constraints:
+    
+    * `m == grid.length`
+    * `n == grid[i].length`
+    * `2 <= m, n <= 1000`
+    * `4 <= m * n <= 105`
+    * `0 <= grid[i][j] <= 105`
+    * `grid[0][0] == 0`
+    """"""
+    m, n = len(grid), len(grid[0])
+    queue = deque([(0, 0, 0)]  # (row, col, time)
+    visited = {(0, 0)}
+    
+    while queue:
+        r, c, t = queue.popleft()
+        
+        if r == m - 1 and c == n - 1:
+            return t
+        
+        for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            nr, nc = r + dr, c + dc
+            
+            if 0 <= nr < m and 0 <= nc < n and t + 1 >= grid[nr][nc] and (nr, nc) not in visited:
+                queue.append((nr, nc, t + 1))
+                visited.add((nr, nc))
+    
+    return -1",55,False,-1,-1,-1,"**Tests that the code passed:**
+
+No tests passed.
+
+
+**Tests that the code failed:**
+
+assert minimumTime([[0,1,3,2],[5,1,2,5],[4,3,8,6]]) == 7 # ERROR: This unit test fails because the function generated: '(' was never closed (<string>, line 51).
+assert minimumTime([[0,2,4],[3,2,1],[1,0,4]]) == -1 # ERROR: This unit test fails because the function generated: '(' was never closed (<string>, line 51).","(False, False)",0
+minimum-time-to-visit-a-cell-in-a-grid,"from collections import deque
+from typing import List
+
+def minimumTime(grid: List[List[int]]) -> int:
+    if not grid or not grid[0]:
+        return -1
+    
+    m, n = len(grid), len(grid[0])
+    
+    if grid[0][0] > 0:
+        return -1
+    
+    queue = deque([(0, 0, 0)]  # (row, col, time)
+    visited = [False] * (m * n)
+    time_at_cell = [0] * (m * n)
+    
+    visited[0] = True
+    time_at_cell[0] = 0
+    
+    while queue:
+        r, c, t = queue.popleft()
+        
+        if r == m - 1 and c == n - 1:
+            return t
+        
+        for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            nr, nc = r + dr, c + dc
+            
+            if 0 <= nr < m and 0 <= nc < n and t + 1 >= grid[nr][nc] and not visited[nr * n + nc]:
+                queue.append((nr, nc, t + 1))
+                visited[nr * n + nc] = True
+                time_at_cell[nr * n + nc] = t + 1
+    
+    return -1",55,False,-1,-1,-1,,,1
+find-the-string-with-lcp,"
+from typing import List
+
+def findTheString(lcp: List[List[int]]) -> str:
+    n = len(lcp)
+    dp = [[0] * n for _ in range(n)]
+    dp[0][0] = chr(ord('a') + lcp[0][0] - 1)
+    
+    for i in range(1, n):
+        dp[0][i] = chr(ord('a') + lcp[0][i] - 1)
+        dp[i][0] = chr(ord('a') + lcp[i][0] - 1)
+    
+    for i in range(1, n):
+        for j in range(1, n):
+            if lcp[i][j] == 0:
+                dp[i][j] = chr(ord('a') + lcp[i][j] - 1)
+            elif lcp[i][j] == lcp[i-1][j-1]:
+                dp[i][j] = dp[i-1][j-1]
+            elif lcp[i][j] < lcp[i-1][j-1]:
+                dp[i][j] = chr(ord(dp[i-1][j-1]) + 1)
+            else:
+                dp[i][j] = chr(ord(dp[i-1][j]) - 1)
+    
+    for i in range(n):
+        if dp[i][i] > chr(ord('a') + lcp[i][i] - 1):
+            return """"
+    
+    return """".join(chr(i) for i in dp)
+",55,False,1,55,N/A,"**Tests that the code passed:**
+
+assert findTheString([[4,3,2,1],[3,3,2,1],[2,2,2,1],[1,1,1,3]]) == """"
+
+**Tests that the code failed:**
+
+assert findTheString([[4,0,2,0],[0,3,0,1],[2,0,2,0],[0,1,0,1]]) == ""abab"" # ERROR: This unit test fails. Output was , but expected value was: ""abab""
+assert findTheString([[4,3,2,1],[3,3,2,1],[2,2,2,1],[1,1,1,1]]) == ""aaaa"" # ERROR: This unit test fails. Output was , but expected value was: ""aaaa""","(False, False, True)",0
+find-the-string-with-lcp,"from typing import List
+
+def findTheString(lcp: List[List[int]]) -> str:
+    # Check if the input matrix is a square matrix
+    if len(lcp)!= len(lcp[0]):
+        raise ValueError(""Input matrix is not a square matrix"")
+
+    # Check if the input matrix contains invalid values
+    for i in range(len(lcp)):
+        for j in range(len(lcp[0])):
+            if lcp[i][j] < 0 or lcp[i][j] > len(lcp):
+                raise ValueError(""Input matrix contains invalid values"")
+
+    # Initialize the dp table
+    dp = [[0] * len(lcp[0]) for _ in range(len(lcp))]
+
+    # Fill in the dp table
+    for i in range(len(lcp)):
+        for j in range(len(lcp[0])):
+            if i == 0 or j == 0:
+                # Base case: if i or j is 0, the character is the first character of the string
+                dp[i][j] = chr(ord('a') + lcp[i][j])
+            elif lcp[i][j] == 0:
+                # If the lcp value is 0, the characters are different
+                dp[i][j] = chr(ord('a') + lcp[i][j])
+            elif lcp[i][j] == lcp[i-1][j-1]:
+                # If the lcp value is the same as the previous one, the characters are the same
+                dp[i][j] = dp[i-1][j-1]
+            elif lcp[i][j] < lcp[i-1][j-1]:
+                # If the lcp value is less than the previous one, the character is one more than the previous one
+                dp[i][j] = chr(ord(dp[i-1][j]) + 1)
+            else:
+                # If the lcp value is greater than the previous one, the character is one less than the previous one
+                dp[i][j] = chr(ord(dp[i-1][j-1]) - 1)
+
+    # Check if all elements in the lcp matrix are the same
+    if all(lcp[i][0] == lcp[0][0] for i in range(len(lcp))):
+        # If all elements are the same, return the string with all characters being the same
+        return 'a' * lcp[0][0]
+
+    # Return the string represented by the dp table
+    return """".join(chr(dp[i][i]) for i in range(len(lcp)) if dp[i][i] <= ord('a') + lcp[i][i]) or """"",55,False,0,55,N/A,,,1
+handling-sum-queries-after-update,"
+from typing import List
+
+class SegmentTree:
+    def __init__(self, nums: List[int]):
+        self.n = len(nums)
+        self.tree = [0] * (4 * self.n)
+        self.build_tree(nums, 0, 0, self.n - 1)
+
+    def build_tree(self, nums: List[int], node: int, start: int, end: int):
+        if start == end:
+            self.tree[node] = nums[start]
+        else:
+            mid = (start + end) // 2
+            self.build_tree(nums, 2 * node + 1, start, mid)
+            self.build_tree(nums, 2 * node + 2, mid + 1, end)
+            self.tree[node] = self.tree[2 * node + 1] + self.tree[2 * node + 2]
+
+    def update(self, node: int, start: int, end: int, left: int, right: int, val: int):
+        if start > right or end < left:
+            return
+        if start >= left and end <= right:
+            self.tree[node] = val
+            return
+        mid = (start + end) // 2
+        self.update(2 * node + 1, start, mid, left, right, val)
+        self.update(2 * node + 2, mid + 1, end, left, right, val)
+        self.tree[node] = self.tree[2 * node + 1] + self.tree[2 * node + 2]
+
+    def query(self, node: int, start: int, end: int, left: int, right: int):
+        if start > right or end < left:
+            return 0
+        if start >= left and end <= right:
+            return self.tree[node]
+        mid = (start + end) // 2
+        return self.query(2 * node + 1, start, mid, left, right) + self.query(2 * node + 2, mid + 1, end, left, right)
+
+def handleQuery(nums1: List[int], nums2: List[int], queries: List[List[int]]) -> List[int]:
+    n = len(nums1)
+    segment_tree = SegmentTree(nums1)
+    prefix_sum = [0] * n
+    for i in range(n):
+        prefix_sum[i] = nums2[i] + nums1[i] * 0
+    result = []
+    for query in queries:
+        if query[0] == 1:
+            left, right = query[1], query[2]
+            segment_tree.update(0, 0, n - 1, left, right, 1 - nums1[left] if left == right else 0)
+            for i in range(left, right + 1):
+                prefix_sum[i] = prefix_sum[i - 1] if i > 0 else 0
+                if nums1[i] == 1:
+                    prefix_sum[i] += 1
+                else:
+                    prefix_sum[i] -= 1
+        elif query[0] == 2:
+            p = query[2]
+            for i in range(n):
+                prefix_sum[i] = prefix_sum[i] + nums1[i] * p
+        else:
+            result.append(segment_tree.query(0, 0, n - 1, 0, n - 1))
+    return result
+",55,False,0,77,N/A,"**Tests that the code passed:**
+
+assert handleQuery([1,0,1], [0,0,0], [[1,1,1],[2,1,0],[3,0,0]]) == [3]
+
+**Tests that the code failed:**
+
+assert handleQuery([1], [5], [[2,0,0],[3,0,0]]) == [5] # ERROR: This unit test fails. Output was [1], but expected value was: [5]","(True, False)",0
+handling-sum-queries-after-update,"from typing import List, numpy as np
+
+class SegmentTree:
+    def __init__(self, nums: List[int]):
+        self.n = len(nums)
+        self.tree = np.zeros(4 * self.n, dtype=int)
+        self.updates = np.zeros(4 * self.n, dtype=int)
+        self.build_tree(nums, 0, 0, self.n - 1)
+
+    def build_tree(self, nums: List[int], node: int, start: int, end: int):
+        if start == end:
+            self.tree[node] = nums[start]
+        else:
+            mid = (start + end) // 2
+            self.build_tree(nums, 2 * node + 1, start, mid)
+            self.build_tree(nums, 2 * node + 2, mid + 1, end)
+            self.tree[node] = self.tree[2 * node + 1] + self.tree[2 * node + 2]
+
+    def update(self, node: int, start: int, end: int, left: int, right: int, val: int):
+        if start > right or end < left:
+            return
+        if start >= left and end <= right:
+            self.updates[node] = val
+            return
+        mid = (start + end) // 2
+        self.update(2 * node + 1, start, mid, left, right, val)
+        self.update(2 * node + 2, mid + 1, end, left, right, val)
+
+    def propagate_updates(self, node: int, start: int, end: int):
+        if self.updates[node]!= 0:
+            if start!= end:
+                self.updates[2 * node + 1] += self.updates[node]
+                self.updates[2 * node + 2] += self.updates[node]
+            self.tree[node] += self.updates[node] * (end - start + 1)
+            self.updates[node] = 0
+
+    def query(self, node: int, start: int, end: int, left: int, right: int):
+        if start > right or end < left:
+            return 0
+        if start >= left and end <= right:
+            return self.tree[node]
+        mid = (start + end) // 2
+        self.propagate_updates(node, start, end)
+        return self.query(2 * node + 1, start, mid, left, right) + self.query(2 * node + 2, mid + 1, end, left, right)
+
+def handleQuery(nums1: List[int], nums2: List[int], queries: List[List[int]]) -> List[int]:
+    n = len(nums1)
+    segment_tree = SegmentTree(nums1)
+    prefix_sum = np.zeros(n, dtype=int)
+    for i in range(n):
+        prefix_sum[i] = nums2[i] + nums1[i] * 0
+    result = []
+    for query in queries:
+        if query[0] == 1:
+            left, right = query[1], query[2]
+            if left > right:
+                continue
+            segment_tree.update(0, 0, n - 1, left, right, 1 - nums1[left])
+            prefix_sum[left] = 1 - nums1[left]
+            if left!= right:
+                prefix_sum[right] = 1 - nums1[right]
+            for i in range(left + 1, right):
+                prefix_sum[i] = prefix_sum[i - 1]
+                if nums1[i] == 1:
+                    prefix_sum[i] += 1
+                else:
+                    prefix_sum[i] -= 1
+        elif query[0] == 2:
+            p = query[2]
+            for i in range(n):
+                prefix_sum[i] = prefix_sum[i] + nums1[i] * p
+                segment_tree.update(0, 0, n - 1, i, i, p)
+        else:
+            segment_tree.propagate_updates(0, 0, n - 1)
+            result.append(int(sum(prefix_sum)))
+    return result",55,False,0,77,N/A,,,1
+subsequence-with-the-minimum-score,"
+def minimumScore(s: str, t: str) -> int:
+    n, m = len(s), len(t)
+    dp = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            if s[i - 1] == t[j - 1]:
+                dp[i][j] = dp[i - 1][j - 1] + 1
+            else:
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+    left, right = n, m
+    score = float('inf')
+    while left >= 0 and right >= 0:
+        if s[left - 1] == t[right - 1]:
+            left -= 1
+            right -= 1
+        elif dp[left - 1][right] > dp[left][right - 1]:
+            left -= 1
+        else:
+            right -= 1
+        if left >= 0 and right >= 0:
+            score = min(score, right - left)
+    return score
+",55,False,0,54,N/A,"**Tests that the code passed:**
+
+No tests passed.
+
+
+**Tests that the code failed:**
+
+assert minimumScore(""abacaba"", ""bzaa"") == 1 # ERROR: This unit test fails. Output was -3, but expected value was: 1
+assert minimumScore(""cde"", ""xyz"") == 3 # ERROR: This unit test fails. Output was -3, but expected value was: 3","(False, False)",0
+subsequence-with-the-minimum-score,"import sys
+
+def minimumScore(s: str, t: str) -> int:
+    if not t:
+        return 0
+    if not s:
+        return len(t)
+
+    n, m = len(s), len(t)
+    dp = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(n + 1):
+        dp[i][0] = i
+    for j in range(m + 1):
+        dp[0][j] = j
+
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            if s[i - 1] == t[j - 1]:
+                dp[i][j] = dp[i - 1][j - 1] + 1
+            else:
+                dp[i][j] = 1 + min(dp[i - 1][j], dp[i][j - 1])
+
+    s_index, t_index = n, m
+    score = sys.maxsize
+    while s_index >= 0 and t_index >= 0:
+        if s[s_index - 1] == t[t_index - 1]:
+            score = min(score, t_index - s_index + 1)
+            s_index -= 1
+            t_index -= 1
+        elif s_index > 0 and t_index > 0 and dp[s_index - 1][t_index] < dp[s_index][t_index - 1]:
+            s_index -= 1
+        else:
+            t_index -= 1
+
+    return score if score!= sys.maxsize else len(t)",55,False,2,54,N/A,,,1
+minimum-number-of-visited-cells-in-a-grid,"from typing import List
+
+def minimumVisitedCells(grid: List[List[int]]) -> int:
+    m, n = len(grid), len(grid[0])
+    dp = [[float('inf')] * n for _ in range(m)]
+    dp[0][0] = 1
+
+    for i in range(m):
+        for j in range(n):
+            if i == 0 and j == 0:
+                continue
+            for k in range(1, grid[i][j] + max(i, j) + 1):
+                if 0 <= k < m and 0 <= k < n:
+                    dp[k][j] = min(dp[k][j], dp[i][j] + 1)
+                    dp[i][k] = min(dp[i][k], dp[i][j] + 1)
+
+    return dp[m - 1][n - 1] if dp[m - 1][n - 1]!= float('inf') else -1",55,False,0,0,-1,"**Tests that the code passed:**
+
+assert minimumVisitedCells([[2,1,0],[1,0,0]]) == -1
+
+**Tests that the code failed:**
+
+assert minimumVisitedCells([[3,4,2,1],[4,2,3,1],[2,1,0,0],[2,4,0,0]]) == 4 # ERROR: This unit test fails. Output was -1, but expected value was: 4
+assert minimumVisitedCells([[3,4,2,1],[4,2,1,1],[2,1,1,0],[3,4,1,0]]) == 3 # ERROR: This unit test fails. Output was -1, but expected value was: 3","(False, False, True)",0
+minimum-number-of-visited-cells-in-a-grid,"from collections import deque
+from typing import List
+
+def minimumVisitedCells(grid: List[List[int]]) -> int:
+    if not grid or not grid[0]:
+        return -1
+
+    m, n = len(grid), len(grid[0])
+    dp = [[float('inf')] * n for _ in range(m)]
+    dp[0][0] = 1
+
+    queue = deque([(0, 0, 1)])
+    visited = set((0, 0))
+
+    while queue:
+        i, j, dist = queue.popleft()
+        for k in range(max(0, i - grid[i][j] - i), min(m, i + 1)):
+            if (k, j) not in visited:
+                dp[k][j] = min(dp[k][j], dist)
+                queue.append((k, j, dist + 1))
+                visited.add((k, j))
+        for k in range(max(0, j - grid[i][j] - j), min(n, j + 1)):
+            if (i, k) not in visited:
+                dp[i][k] = min(dp[i][k], dist)
+                queue.append((i, k, dist + 1))
+                visited.add((i, k))
+
+    return dp[m - 1][n - 1] if dp[m - 1][n - 1]!= float('inf') else -1",55,False,0,1072,N/A,,,1
+rearranging-fruits,"from typing import List
+
+def minCost(basket1: List[int], basket2: List[int]) -> int:
+    """"""
+    You have two fruit baskets containing `n` fruits each. You are given two
+    0-indexed integer arrays `basket1` and `basket2` representing the cost of
+    fruit in each basket. You want to make both baskets equal. To do so, you can
+    use the following operation as many times as you want:
+    
+    * Chose two indices `i` and `j`, and swap the `ith `fruit of `basket1` with the `jth` fruit of `basket2`.
+    * The cost of the swap is `min(basket1[i],basket2[j])`.
+    
+    Two baskets are considered equal if sorting them according to the fruit cost
+    makes them exactly the same baskets.
+    
+    Return the minimum cost to make both the baskets equal or `-1` if impossible.
+    
+    Example 1:
+    
+    Input: basket1 = [4,2,2,2], basket2 = [1,4,1,2]
+    Output: 1
+    Explanation: Swap index 1 of basket1 with index 0 of basket2, which has cost 1. Now basket1 = [4,1,2,2] and basket2 = [2,4,1,2]. Rearranging both the arrays makes them equal.
+    
+    Example 2:
+    
+    Input: basket1 = [2,3,4,1], basket2 = [3,2,5,1]
+    Output: -1
+    Explanation: It can be shown that it is impossible to make both the baskets equal.
+    
+    Constraints:
+    
+    * `basket1.length == basket2.length`
+    * `1 <= basket1.length <= 105`
+    * `1 <= basket1[i],basket2[i] <= 109`
+    """"""
+    n = len(basket1)
+    if sorted(basket1)!= sorted(basket2):
+        return -1
+    
+    cost = 0
+    for i in range(n):
+        cost += min(basket1[i], basket2[i])
+    
+    return cost",55,False,7,40,N/A,"**Tests that the code passed:**
+
+assert minCost([2,3,4,1], [3,2,5,1]) == -1
+
+**Tests that the code failed:**
+
+assert minCost([4,2,2,2], [1,4,1,2]) == 1 # ERROR: This unit test fails. Output was -1, but expected value was: 1","(False, True)",0
+rearranging-fruits,"from typing import List
+
+def minCost(basket1: List[int], basket2: List[int]) -> int:
+    """"""
+    You have two fruit baskets containing `n` fruits each. You are given two
+    0-indexed integer arrays `basket1` and `basket2` representing the cost of
+    fruit in each basket. You want to make both baskets equal. To do so, you can
+    use the following operation as many times as you want:
+    
+    * Chose two indices `i` and `j`, and swap the `ith `fruit of `basket1` with the `jth` fruit of `basket2`.
+    * The cost of the swap is `min(basket1[i],basket2[j])`.
+    
+    Two baskets are considered equal if sorting them according to the fruit cost
+    makes them exactly the same baskets.
+    
+    Return the minimum cost to make both the baskets equal or `-1` if impossible.
+    
+    Example 1:
+    
+    Input: basket1 = [4,2,2,2], basket2 = [1,4,1,2]
+    Output: 1
+    Explanation: Swap index 1 of basket1 with index 0 of basket2, which has cost 1. Now basket1 = [4,1,2,2] and basket2 = [2,4,1,2]. Rearranging both the arrays makes them equal.
+    
+    Example 2:
+    
+    Input: basket1 = [2,3,4,1], basket2 = [3,2,5,1]
+    Output: -1
+    Explanation: It can be shown that it is impossible to make both the baskets equal.
+    
+    Constraints:
+    
+    * `basket1.length == basket2.length`
+    * `1 <= basket1.length <= 105`
+    * `1 <= basket1[i],basket2[i] <= 109`
+    """"""
+    n = len(basket1)
+    if sorted(basket1) == sorted(basket2):
+        return 0
+    
+    # Sort the baskets in ascending order
+    basket1.sort()
+    basket2.sort()
+    
+    cost = 0
+    i, j = 0, 0
+    while i < n and j < n:
+        if basket1[i] < basket2[j]:
+            i += 1
+        elif basket2[j] < basket1[i]:
+            j += 1
+        else:
+            cost += basket1[i]
+            i += 1
+            j += 1
+    
+    if i < n or j < n:
+        return -1
+    
+    return cost",55,False,15,40,N/A,,,1
+lexicographically-smallest-beautiful-string,"
+def smallestBeautifulString(s: str, k: int) -> str:
+    n = len(s)
+    for i in range(n - 1, -1, -1):
+        if s[i]!= chr(ord('a') + k - 1):
+            for j in range(ord(s[i]) + 1, ord('a') + k):
+                t = list(s)
+                t[i] = chr(j)
+                if not is_palindrome(t):
+                    return ''.join(t)
+            return ''
+        elif i > 0 and s[i - 1] == s[i]:
+            for j in range(ord(s[i]) + 1, ord('a') + k):
+                t = list(s)
+                t[i] = chr(j)
+                if not is_palindrome(t):
+                    return ''.join(t)
+            return ''
+    return ''
+
+def is_palindrome(s: str) -> bool:
+    return s == s[::-1]
+",55,False,0,1054,N/A,"**Tests that the code passed:**
+
+assert smallestBeautifulString(""dc"", 4) == """"
+
+**Tests that the code failed:**
+
+assert smallestBeautifulString(""abcz"", 26) == ""abda"" # ERROR: This unit test fails. Output was abdz, but expected value was: ""abda""","(False, True)",0
+lexicographically-smallest-beautiful-string,"import string
+
+def is_beautiful(s: str) -> bool:
+    return len(s) == len(set(s))
+
+def is_palindrome(s: str) -> bool:
+    left, right = 0, len(s) - 1
+    while left < right:
+        if s[left]!= s[right]:
+            return False
+        left += 1
+        right -= 1
+    return True
+
+def smallestBeautifulString(s: str, k: int) -> str:
+    if len(s) == 0:
+        return ''
+    if len(s) == 1:
+        return s
+    if is_beautiful(s):
+        alphabet = string.ascii_lowercase[:k]
+        if s[-1] == alphabet[-1]:
+            return s
+        for i in range(len(s) - 2, -1, -1):
+            if s[i]!= alphabet[-1]:
+                for j in range(ord(s[i]) + 1, ord(alphabet[-1]) + 1):
+                    new_char = chr(j)
+                    if new_char not in s:
+                        new_string = list(s)
+                        new_string[i] = new_char
+                        if not is_palindrome(''.join(new_string)):
+                            return ''.join(new_string)
+                return ''
+            elif i > 0 and s[i - 1] == s[i]:
+                for j in range(ord(s[i]) + 1, ord(alphabet[-1]) + 1):
+                    new_char = chr(j)
+                    if new_char not in s:
+                        new_string = list(s)
+                        new_string[i] = new_char
+                        if not is_palindrome(''.join(new_string)):
+                            return ''.join(new_string)
+                        new_string[i - 1] = new_char
+                        if not is_palindrome(''.join(new_string)):
+                            return ''.join(new_string)
+                return ''
+    return ''",55,False,0,1054,N/A,,,1
+count-increasing-quadruplets,"from typing import List
+
+def countQuadruplets(nums: List[int]) -> int:
+    n = len(nums)
+    count = 0
+    for i in range(n - 3):
+        for j in range(i + 1, n - 2):
+            for k in range(j + 1, n - 1):
+                for l in range(k + 1, n):
+                    if nums[i] < nums[k] < nums[j] < nums[l]:
+                        count += 1
+    return count",55,False,63,121,N/A,"**Tests that the code passed:**
+
+assert countQuadruplets([1,3,2,4,5]) == 2
+assert countQuadruplets([1,2,3,4]) == 0
+
+**Tests that the code failed:**
+
+No tests failed.
+","(True, True)",1
+count-increasing-quadruplets,"from typing import List
+
+def countQuadruplets(nums: List[int]) -> int:
+    n = len(nums)
+    count = 0
+    for i in range(n - 3):
+        for j in range(i + 1, n - 2):
+            for k in range(j + 1, n - 1):
+                for l in range(k + 1, n):
+                    if nums[i] < nums[k] < nums[j] < nums[l]:
+                        count += 1
+    return count",55,False,63,121,N/A,"**Tests that the code passed:**
+
+assert countQuadruplets([1,3,2,4,5]) == 2
+assert countQuadruplets([1,2,3,4]) == 0
+
+**Tests that the code failed:**
+
+No tests failed.
+","(True, True)",1
+put-marbles-in-bags,"
+from typing import List
+
+def putMarbles(weights: List[int], k: int) -> int:
+    n = len(weights)
+    prefix_sum = [0] * (n + 1)
+    for i in range(n):
+        prefix_sum[i + 1] = prefix_sum[i] + weights[i]
+    
+    def check(mid: int) -> bool:
+        bags = 1
+        max_weight = weights[0]
+        for i in range(1, n):
+            if weights[i] > mid:
+                return False
+            if weights[i] + max_weight > mid:
+                bags += 1
+                max_weight = weights[i]
+            else:
+                max_weight = max(max_weight, weights[i])
+        return bags <= k
+    
+    left, right = 0, prefix_sum[-1]
+    while left < right:
+        mid = (left + right) // 2
+        if check(mid):
+            right = mid
+        else:
+            left = mid + 1
+    return right - prefix_sum[k]
+",55,False,0,103,N/A,"**Tests that the code passed:**
+
+No tests passed.
+
+
+**Tests that the code failed:**
+
+assert putMarbles([1,3,5,1], 2) == 4 # ERROR: This unit test fails. Output was 2, but expected value was: 4
+assert putMarbles([1,3], 2) == 0 # ERROR: This unit test fails. Output was -1, but expected value was: 0","(False, False)",0
+put-marbles-in-bags,"from typing import List
+
+def putMarbles(weights: List[int], k: int) -> int:
+    n = len(weights)
+    prefix_sum = [0] * (n + 1)
+    for i in range(n):
+        prefix_sum[i + 1] = prefix_sum[i] + weights[i]
+    
+    def check(mid: int) -> bool:
+        bags = 1
+        max_weight = 0
+        current_bag_weight = 0
+        for i in range(n):
+            if weights[i] <= mid:
+                current_bag_weight += weights[i]
+                if current_bag_weight > mid:
+                    bags += 1
+                    max_weight = max(max_weight, current_bag_weight)
+                    current_bag_weight = weights[i]
+            else:
+                bags += 1
+                max_weight = max(max_weight, current_bag_weight)
+                current_bag_weight = weights[i]
+        max_weight = max(max_weight, current_bag_weight)
+        return bags <= k
+    
+    left = max(weights) if k == 1 else sum(weights)
+    right = prefix_sum[-1]
+    while left < right:
+        mid = (left + right) // 2
+        if check(mid):
+            right = mid
+        else:
+            left = mid + 1
+    return right - prefix_sum[k]",55,False,15,103,N/A,,,1
+shortest-cycle-in-a-graph,"from typing import List
+
+def findShortestCycle(n: int, edges: List[List[int]]) -> int:
+    graph = [[] for _ in range(n)]
+    for u, v in edges:
+        graph[u].append(v)
+        graph[v].append(u)
+    
+    visited = [False] * n
+    distance = [float('inf')] * n
+    parent = [-1] * n
+    
+    def dfs(node: int, dist: int) -> bool:
+        visited[node] = True
+        distance[node] = dist
+        for neighbor in graph[node]:
+            if not visited[neighbor]:
+                if dfs(neighbor, dist + 1):
+                    return True
+            elif distance[neighbor] < dist:
+                return True
+        return False
+    
+    for i in range(n):
+        if not visited[i]:
+            if dfs(i, 0):
+                return distance[i]
+    
+    return -1",55,False,0,88,N/A,"**Tests that the code passed:**
+
+No tests passed.
+
+
+**Tests that the code failed:**
+
+assert findShortestCycle(7, [[0,1],[1,2],[2,0],[3,4],[4,5],[5,6],[6,3]]) == 3 # ERROR: This unit test fails. Output was 0, but expected value was: 3
+assert findShortestCycle(4, [[0,1],[0,2]]) == -1 # ERROR: This unit test fails. Output was 0, but expected value was: -1","(False, False)",0
+shortest-cycle-in-a-graph,"from typing import List
+
+def find_shortest_cycle(n: int, edges: List[List[int]]) -> int:
+    """"""
+    Find the length of the shortest cycle in a graph.
+
+    Args:
+    n: The number of vertices in the graph.
+    edges: A list of edges in the graph, where each edge is represented as a list of two vertices.
+
+    Returns:
+    The length of the shortest cycle in the graph, or -1 if no cycle exists.
+    """"""
+    graph = [[] for _ in range(n)]
+    for u, v in edges:
+        graph[u].append(v)
+        graph[v].append(u)
+
+    visited = [False] * n
+    shortest_distance = float('inf')
+    parent = [-1] * n
+
+    def dfs(node: int, current_distance: int) -> int:
+        """"""
+        Perform a depth-first search from the given node.
+
+        Args:
+        node: The current node.
+        current_distance: The distance from the starting node to the current node.
+
+        Returns:
+        The length of the shortest cycle found, or -1 if no cycle exists.
+        """"""
+        visited[node] = True
+        if current_distance < shortest_distance:
+            shortest_distance = current_distance
+        for neighbor in graph[node]:
+            if not visited[neighbor]:
+                if dfs(neighbor, current_distance + 1)!= -1:
+                    return current_distance + 1
+            elif current_distance + 1 < shortest_distance:
+                return current_distance + 1
+        return -1
+
+    for i in range(n):
+        if not visited[i]:
+            if dfs(i, 0)!= -1:
+                return dfs(i, 0)
+    return -1",55,False,0,88,N/A,,,1
+minimum-time-to-complete-all-tasks,"
+from typing import List
+
+def findMinimumTime(tasks: List[List[int]]) -> int:
+    """"""
+    There is a computer that can run an unlimited number of tasks at the same
+    time. You are given a 2D integer array `tasks` where `tasks[i] = [starti,
+    endi, durationi]` indicates that the `ith` task should run for a total of
+    `durationi` seconds (not necessarily continuous) within the inclusive time
+    range `[starti, endi]`.
+    
+    You may turn on the computer only when it needs to run a task. You can also
+    turn it off if it is idle.
+    
+    Return the minimum time during which the computer should be turned on to
+    complete all tasks.
+    
+    Example 1:
+    
+    Input: tasks = [[2,3,1],[4,5,1],[1,5,2]]
+    Output: 2
+    Explanation: 
+    - The first task can be run in the inclusive time range [2, 2].
+    - The second task can be run in the inclusive time range [5, 5].
+    - The third task can be run in the two inclusive time ranges [2, 2] and [5, 5].
+    The computer will be on for a total of 2 seconds.
+    
+    Example 2:
+    
+    Input: tasks = [[1,3,2],[2,5,3],[5,6,2]]
+    Output: 4
+    Explanation: 
+    - The first task can be run in the inclusive time range [2, 3].
+    - The second task can be run in the inclusive time ranges [2, 3] and [5, 5].
+    - The third task can be run in the two inclusive time range [5, 6].
+    The computer will be on for a total of 4 seconds.
+    
+    Constraints:
+    
+    * `1 <= tasks.length <= 2000`
+    * `tasks[i].length == 3`
+    * `1 <= starti, endi <= 2000`
+    * `1 <= durationi <= endi - starti + 1 `
+    """"""
+    tasks.sort(key=lambda x: x[1])
+    end = 0
+    time = 0
+    for start, end_task, duration in tasks:
+        if start > end:
+            time += start - end
+            end = start
+        end = max(end, end_task)
+        time += duration
+    return time
+",55,False,0,1059,N/A,"**Tests that the code passed:**
+
+No tests passed.
+
+
+**Tests that the code failed:**
+
+assert findMinimumTime([[2,3,1],[4,5,1],[1,5,2]]) == 2 # ERROR: This unit test fails. Output was 7, but expected value was: 2
+assert findMinimumTime([[1,3,2],[2,5,3],[5,6,2]]) == 4 # ERROR: This unit test fails. Output was 8, but expected value was: 4","(False, False)",0
+minimum-time-to-complete-all-tasks,"from typing import List
+
+def findMinimumTime(tasks: List[List[int]]) -> int:
+    """"""
+    There is a computer that can run an unlimited number of tasks at the same
+    time. You are given a 2D integer array `tasks` where `tasks[i] = [starti,
+    endi, durationi]` indicates that the `ith` task should run for a total of
+    `durationi` seconds (not necessarily continuous) within the inclusive time
+    range `[starti, endi]`.
+    
+    You may turn on the computer only when it needs to run a task. You can also
+    turn it off if it is idle.
+    
+    Return the minimum time during which the computer should be turned on to
+    complete all tasks.
+    
+    Example 1:
+    
+    Input: tasks = [[2,3,1],[4,5,1],[1,5,2]]
+    Output: 2
+    Explanation: 
+    - The first task can be run in the inclusive time range [2, 2].
+    - The second task can be run in the inclusive time range [5, 5].
+    - The third task can be run in the two inclusive time ranges [2, 2] and [5, 5].
+    The computer will be on for a total of 2 seconds.
+    
+    Example 2:
+    
+    Input: tasks = [[1,3,2],[2,5,3],[5,6,2]]
+    Output: 4
+    Explanation: 
+    - The first task can be run in the inclusive time range [2, 3].
+    - The second task can be run in the inclusive time ranges [2, 3] and [5, 5].
+    - The third task can be run in the two inclusive time range [5, 6].
+    The computer will be on for a total of 4 seconds.
+    
+    Constraints:
+    
+    * `1 <= tasks.length <= 2000`
+    * `tasks[i].length == 3`
+    * `1 <= starti, endi <= 2000`
+    * `1 <= durationi <= endi - starti + 1 `
+    """"""
+    tasks.sort(key=lambda x: x[1])
+    end = 0
+    time = 0
+    for start, end_task, duration in tasks:
+        if start > end:
+            time += start - end
+            end = start
+        end = max(end, end_task)
+        time += duration
+    return time",55,False,0,1059,N/A,,,1
+count-number-of-possible-root-nodes,"
+from typing import List
+
+def rootCount(edges: List[List[int]], guesses: List[List[int]], k: int) -> int:
+    n = len(edges) + 1
+    graph = [[] for _ in range(n)]
+    in_degree = [0] * n
+    for u, v in edges:
+        graph[u].append(v)
+        graph[v].append(u)
+        in_degree[u] += 1
+        in_degree[v] += 1
+
+    def dfs(node: int, parent: int) -> int:
+        count = 1
+        for child in graph[node]:
+            if child!= parent:
+                count += dfs(child, node)
+        return count
+
+    root_count = 0
+    for i in range(n):
+        if in_degree[i] == 1:
+            root_count += dfs(i, -1)
+
+    for u, v in guesses:
+        graph[u].remove(v)
+        graph[v].remove(u)
+        in_degree[u] -= 1
+        in_degree[v] -= 1
+        if in_degree[u] == 0:
+            root_count += dfs(u, -1)
+        if in_degree[v] == 0:
+            root_count += dfs(v, -1)
+
+    return min(root_count, k)
+",55,False,0,51,N/A,"**Tests that the code passed:**
+
+No tests passed.
+
+
+**Tests that the code failed:**
+
+assert rootCount([[0,1],[1,2],[1,3],[4,2]], [[1,3],[0,1],[1,0],[2,4]], 3) == 3 # ERROR: This unit test fails because the function generated: list.remove(x): x not in list.
+assert rootCount([[0,1],[1,2],[2,3],[3,4]], [[1,0],[3,4],[2,1],[3,2]], 1) == 5 # ERROR: This unit test fails. Output was 1, but expected value was: 5","(False, False)",0
+count-number-of-possible-root-nodes,"from typing import List, Dict, Set
+
+def rootCount(edges: List[List[int]], guesses: List[List[int]], k: int) -> int:
+    """"""
+    Alice has an undirected tree with `n` nodes labeled from `0` to `n - 1`. The
+    tree is represented as a 2D integer array `edges` of length `n - 1` where
+    `edges[i] = [ai, bi]` indicates that there is an edge between nodes `ai` and
+    `bi` in the tree.
+    
+    Alice wants Bob to find the root of the tree. She allows Bob to make several
+    guesses about her tree. In one guess, he does the following:
+    
+    * Chooses two distinct integers `u` and `v` such that there exists an edge `[u, v]` in the tree.
+    * He tells Alice that `u` is the parent of `v` in the tree.
+    
+    Bob's guesses are represented by a 2D integer array `guesses` where
+    `guesses[j] = [uj, vj]` indicates Bob guessed `uj` to be the parent of `vj`.
+    
+    Alice being lazy, does not reply to each of Bob's guesses, but just says that
+    at least `k` of his guesses are `true`.
+    
+    Given the 2D integer arrays `edges`, `guesses` and the integer `k`, return the
+    number of possible nodes that can be the root of Alice's tree. If there is no
+    such tree, return `0`.
+    
+    Example 1:
+    
+    Input: edges = [[0,1],[1,2],[1,3],[4,2]], guesses = [[1,3],[0,1],[1,0],[2,4]], k = 3
+    Output: 3
+    Explanation: 
+    Root = 0, correct guesses = [1,3], [0,1], [2,4]
+    Root = 1, correct guesses = [1,3], [1,0], [2,4]
+    Root = 2, correct guesses = [1,3], [1,0], [2,4]
+    Root = 3, correct guesses = [1,0], [2,4]
+    Root = 4, correct guesses = [1,3], [1,0]
+    Considering 0, 1, or 2 as root node leads to 3 correct guesses.
+    
+    Example 2:
+    
+    Input: edges = [[0,1],[1,2],[2,3],[3,4]], guesses = [[1,0],[3,4],[2,1],[3,2]], k = 1
+    Output: 5
+    Explanation: 
+    Root = 0, correct guesses = [3,4]
+    Root = 1, correct guesses = [1,0], [3,4]
+    Root = 2, correct guesses = [1,0], [2,1], [3,4]
+    Root = 3, correct guesses = [1,0], [2,1], [3,2], [3,4]
+    Root = 4, correct guesses = [1,0], [2,1], [3,2]
+    Considering any node as root will give at least 1 correct guess. 
+    
+    Constraints:
+    
+    * `edges.length == n - 1`
+    * `2 <= n <= 10^5`
+    * `1 <= guesses.length <= 10^5`
+    * `0 <= ai, bi, uj, vj <= n - 1`
+    * `ai!= bi`
+    * `uj!= vj`
+    * `edges` represents a valid tree.
+    * `guesses[j]` is an edge of the tree.
+    * `guesses` is unique.
+    * `0 <= k <= guesses.length`
+    """"""
+
+    n = len(edges) + 1
+    graph: Dict[int, Set[int]] = {}
+    in_degree: Dict[int, int] = {i: 0 for i in range(n)}
+    for u, v in edges:
+        graph.setdefault(u, set()).add(v)
+        graph.setdefault(v, set()).add(u)
+        in_degree[u] += 1
+        in_degree[v] += 1
+
+    def dfs(node: int) -> int:
+        count = 1
+        for child in graph[node]:
+            count += dfs(child)
+        return count
+
+    root_count = 0
+    for i in range(n):
+        if in_degree[i] == 1:
+            root_count += 1
+
+    for u, v in guesses:
+        if v in graph[u]:
+            graph[u].remove(v)
+            graph[v].remove(u)
+            in_degree[u] -= 1
+            in_degree[v] -= 1
+            if in_degree[u] == 0 and not graph[u]:
+                root_count += 1
+            if in_degree[v] == 0 and not graph[v]:
+                root_count += 1
+
+    return min(root_count, k)",55,False,3,51,N/A,,,1
+number-of-ways-to-earn-points,"
+from typing import List
+
+def waysToReachTarget(target: int, types: List[List[int]]) -> int:
+    MOD = 10**9 + 7
+    dp = [0] * (target + 1)
+    dp[0] = 1
+    for count, mark in types:
+        for i in range(target, mark - 1, -1):
+            for j in range(count):
+                dp[i] = (dp[i] + dp[i - j * mark]) % MOD
+    return dp[target]
+",55,False,0,63,N/A,"**Tests that the code passed:**
+
+No tests passed.
+
+
+**Tests that the code failed:**
+
+assert waysToReachTarget(6, [[6,1],[3,2],[2,3]]) == 7 # ERROR: This unit test fails. Output was 21, but expected value was: 7
+assert waysToReachTarget(5, [[50,1],[50,2],[50,5]]) == 4 # ERROR: This unit test fails because the function generated: list index out of range.
+assert waysToReachTarget(18, [[6,1],[3,2],[2,3]]) == 1 # ERROR: This unit test fails. Output was 0, but expected value was: 1","(False, False, False)",0
+number-of-ways-to-earn-points,"from typing import List
+
+def waysToReachTarget(target: int, types: List[List[int]]) -> int:
+    if target < 0:
+        return 0
+    MOD = 10**9 + 7
+    dp = [0] * (target + 1)
+    dp[0] = 1
+    for count, mark in types:
+        for i in range(target, count - 1, -1):
+            for j in range(count, 0, -1):
+                dp[i] = (dp[i] + dp[max(0, i - j * mark)]) % MOD
+    return dp[target]",55,False,6,63,N/A,,,1
+split-the-array-to-make-coprime-products,"from math import gcd
+from typing import List
+
+def findValidSplit(nums: List[int]) -> int:
+    """"""
+    You are given a 0-indexed integer array `nums` of length `n`.
+    
+    A split at an index `i` where `0 <= i <= n - 2` is called valid if the product
+    of the first `i + 1` elements and the product of the remaining elements are
+    coprime.
+    
+    * For example, if `nums = [2, 3, 3]`, then a split at the index `i = 0` is valid because `2` and `9` are coprime, while a split at the index `i = 1` is not valid because `6` and `3` are not coprime. A split at the index `i = 2` is not valid because `i == n - 1`.
+    
+    Return the smallest index `i` at which the array can be split validly or `-1`
+    if there is no such split.
+    
+    Two values `val1` and `val2` are coprime if `gcd(val1, val2) == 1` where
+    `gcd(val1, val2)` is the greatest common divisor of `val1` and `val2`.
+    
+    Example 1:
+    
+    Input: nums = [4,7,8,15,3,5]
+    Output: 2
+    Explanation: The table above shows the values of the product of the first i + 1 elements, the remaining elements, and their gcd at each index i.
+    The only valid split is at index 2.
+    
+    Example 2:
+    
+    Input: nums = [4,7,15,8,3,5]
+    Output: -1
+    Explanation: The table above shows the values of the product of the first i + 1 elements, the remaining elements, and their gcd at each index i.
+    There is no valid split.
+    
+    Constraints:
+    
+    * `n == nums.length`
+    * `1 <= n <= 104`
+    * `1 <= nums[i] <= 106`
+    """"""
+    n = len(nums)
+    prefix_product = [1] * n
+    for i in range(n):
+        if i == 0:
+            prefix_product[i] = nums[i]
+        else:
+            prefix_product[i] = prefix_product[i-1] * nums[i]
+    for i in range(n-1):
+        gcd_val = gcd(prefix_product[i], prefix_product[n-1] // prefix_product[i])
+        if gcd_val == 1:
+            return i
+    return -1",55,False,29,75,N/A,"**Tests that the code passed:**
+
+assert findValidSplit([4,7,8,15,3,5]) == 2
+assert findValidSplit([4,7,15,8,3,5]) == -1
+
+**Tests that the code failed:**
+
+No tests failed.
+","(True, True)",1
+split-the-array-to-make-coprime-products,"from math import gcd
+from typing import List
+
+def findValidSplit(nums: List[int]) -> int:
+    """"""
+    You are given a 0-indexed integer array `nums` of length `n`.
+    
+    A split at an index `i` where `0 <= i <= n - 2` is called valid if the product
+    of the first `i + 1` elements and the product of the remaining elements are
+    coprime.
+    
+    * For example, if `nums = [2, 3, 3]`, then a split at the index `i = 0` is valid because `2` and `9` are coprime, while a split at the index `i = 1` is not valid because `6` and `3` are not coprime. A split at the index `i = 2` is not valid because `i == n - 1`.
+    
+    Return the smallest index `i` at which the array can be split validly or `-1`
+    if there is no such split.
+    
+    Two values `val1` and `val2` are coprime if `gcd(val1, val2) == 1` where
+    `gcd(val1, val2)` is the greatest common divisor of `val1` and `val2`.
+    
+    Example 1:
+    
+    Input: nums = [4,7,8,15,3,5]
+    Output: 2
+    Explanation: The table above shows the values of the product of the first i + 1 elements, the remaining elements, and their gcd at each index i.
+    The only valid split is at index 2.
+    
+    Example 2:
+    
+    Input: nums = [4,7,15,8,3,5]
+    Output: -1
+    Explanation: The table above shows the values of the product of the first i + 1 elements, the remaining elements, and their gcd at each index i.
+    There is no valid split.
+    
+    Constraints:
+    
+    * `n == nums.length`
+    * `1 <= n <= 104`
+    * `1 <= nums[i] <= 106`
+    """"""
+    n = len(nums)
+    prefix_product = [1] * n
+    for i in range(n):
+        if i == 0:
+            prefix_product[i] = nums[i]
+        else:
+            prefix_product[i] = prefix_product[i-1] * nums[i]
+    for i in range(n-1):
+        gcd_val = gcd(prefix_product[i], prefix_product[n-1] // prefix_product[i])
+        if gcd_val == 1:
+            return i
+    return -1",55,False,29,75,N/A,"**Tests that the code passed:**
+
+assert findValidSplit([4,7,8,15,3,5]) == 2
+assert findValidSplit([4,7,15,8,3,5]) == -1
+
+**Tests that the code failed:**
+
+No tests failed.
+","(True, True)",1
+time-to-cross-a-bridge,"
+import heapq
+from typing import List
+
+def findCrossingTime(n: int, k: int, time: List[List[int]]) -> int:
+    """"""
+    There are `k` workers who want to move `n` boxes from an old warehouse to a
+    new one. You are given the two integers `n` and `k`, and a 2D integer array
+    `time` of size `k x 4` where `time[i] = [leftToRighti, pickOldi, rightToLefti,
+    putNewi].
+    
+    The warehouses are separated by a river and connected by a bridge. The old
+    warehouse is on the right bank of the river, and the new warehouse is on the
+    left bank of the river. Initially, all `k` workers are waiting on the left
+    side of the bridge. To move the boxes, the `ith` worker (0-indexed) can :
+    
+    * Cross the bridge from the left bank (new warehouse) to the right bank (old warehouse) in `leftToRighti` minutes.
+    * Pick a box from the old warehouse and return to the bridge in `pickOldi` minutes. Different workers can pick up their boxes simultaneously.
+    * Cross the bridge from the right bank (old warehouse) to the left bank (new warehouse) in `rightToLefti` minutes.
+    * Put the box in the new warehouse and return to the bridge in `putNewi` minutes. Different workers can put their boxes simultaneously.
+    
+    A worker `i` is less efficient than a worker `j` if either condition is met:
+    
+    * `leftToRighti + rightToLefti > leftToRightj + rightToLeftj`
+    * `leftToRighti + rightToLefti == leftToRightj + rightToLeftj` and `i > j`
+    
+    The following rules regulate the movement of the workers through the bridge :
+    
+    * If a worker `x` reaches the bridge while another worker `y` is crossing the bridge, `x` waits at their side of the bridge.
+    * If the bridge is free, the worker waiting on the right side of the bridge gets to cross the bridge. If more than one worker is waiting on the right side, the one with the lowest efficiency crosses first.
+    * If the bridge is free and no worker is waiting on the right side, and at least one box remains at the old warehouse, the worker on the left side of the river gets to cross the bridge. If more than one worker is waiting on the left side, the one with the lowest efficiency crosses first.
+    
+    Return the instance of time at which the last worker reaches the left bank of
+    the river after all n boxes have been put in the new warehouse.
+    
+    Example 1:
+    
+    Input: n = 1, k = 3, time = [[1,1,2,1],[1,1,3,1],[1,1,4,1]]
+    Output: 6
+    Explanation: 
+    From 0 to 1: worker 2 crosses the bridge from the left bank to the right bank.
+    From 1 to 2: worker 2 picks up a box from the old warehouse.
+    From 2 to 6: worker 2 crosses the bridge from the right bank to the left bank.
+    From 6 to 7: worker 2 puts a box at the new warehouse.
+    The whole process ends after 7 minutes. We return 6 because the problem asks for the instance of time at which the last worker reaches the left bank.
+    
+    Example 2:
+    
+    Input: n = 3, k = 2, time = [[1,9,1,8],[10,10,10,10]]
+    Output: 50
+    Explanation: 
+    From 0  to 10: worker 1 crosses the bridge from the left bank to the right bank.
+    From 10 to 20: worker 1 picks up a box from the old warehouse.
+    From 10 to 11: worker 0 crosses the bridge from the left bank to the right bank.
+    From 11 to 20: worker 0 picks up a box from the old warehouse.
+    From 20 to 30: worker 1 crosses the bridge from the right bank to the left bank.
+    From 30 to 40: worker 1 puts a box at the new warehouse.
+    From 30 to 31: worker 0 crosses the bridge from the right bank to the left bank.
+    From 31 to 39: worker 0 puts a box at the new warehouse.
+    From 39 to 40: worker 0 crosses the bridge from the left bank to the right bank.
+    From 40 to 49: worker 0 picks up a box from the old warehouse.
+    From 49 to 50: worker 0 crosses the bridge from the right bank to the left bank.
+    From 50 to 58: worker 0 puts a box at the new warehouse.
+    The whole process ends after 58 minutes. We return 50 because the problem asks for the instance of time at which the last worker reaches the left bank.
+    
+    Constraints:
+    
+    * `1 <= n, k <= 104`
+    * `time.length == k`
+    * `time[i].length == 4`
+    * `1 <= leftToRighti, pickOldi, rightToLefti, putNewi <= 1000`
+    """"""
+    # Calculate the total time for each worker to cross the bridge
+    total_time = [left + right for left, _, right, _ in time]
+    # Sort the workers by their total time
+    sorted_workers = sorted(range(k), key=lambda i: total_time[i])
+    # Initialize the current time and the number of boxes left
+    time = 0
+    boxes_left = n
+    # Initialize the heap of workers waiting to cross the bridge
+    waiting_workers = []
+    # Initialize the heap of workers waiting to put a box in the new warehouse
+    putting_workers = []
+    # Initialize the heap of workers waiting to pick a box from the old warehouse
+    picking_workers = []
+    # Add the first worker to the heap of workers waiting to cross the bridge
+    heapq.heappush(waiting_workers, (time + time[sorted_workers[0]], sorted_workers[0]))
+    # While there are still boxes left or workers waiting to cross the bridge
+    while boxes_left > 0 or waiting_workers:
+        # While there are workers waiting to cross the bridge
+        while waiting_workers and boxes_left > 0:
+            # Get the worker with the lowest total time
+            time, worker = heapq.heappop(waiting_workers)
+            # If the worker is not the last one, add them to the heap of workers waiting to put a box in the new warehouse
+            if worker!= sorted_workers[-1]:
+                heapq.heappush(putting_workers, (time + time[worker] + time[worker][2], worker))
+            # Decrement the number of boxes left
+            boxes_left -= 1
+        # While there are workers waiting to put a box in the new warehouse
+        while putting_workers:
+            # Get the worker with the lowest total time
+            time, worker = heapq.heappop(putting_workers)
+            # Add the worker to the heap of workers waiting to cross the bridge
+            heapq.heappush(waiting_workers, (time + time[worker] + time[worker][3], worker))
+        # Increment the current time
+        time += 1
+    # Return the current time
+    return time
+",55,False,0,65,N/A,"**Tests that the code passed:**
+
+No tests passed.
+
+
+**Tests that the code failed:**
+
+assert findCrossingTime(1, 3, [[1,1,2,1],[1,1,3,1],[1,1,4,1]]) == 6 # ERROR: This unit test fails because the function generated: 'int' object is not subscriptable.
+assert findCrossingTime(3, 2, [[1,9,1,8],[10,10,10,10]]) == 50 # ERROR: This unit test fails because the function generated: 'int' object is not subscriptable.","(False, False)",0
+time-to-cross-a-bridge,"import heapq
+from typing import List
+
+def findCrossingTime(n: int, k: int, time: List[List[int]]) -> int:
+    """"""
+    Find the instance of time at which the last worker reaches the left bank of the river after all n boxes have been put in the new warehouse.
+    
+    Args:
+    n (int): The number of boxes to be moved.
+    k (int): The number of workers.
+    time (List[List[int]]): A 2D list containing the time it takes for each worker to perform each action.
+    
+    Returns:
+    int: The instance of time at which the last worker reaches the left bank of the river.
+    """"""
+    sorted_workers = sorted(range(k), key=lambda i: time[i][0] + time[i][2])
+    current_time = 0
+    waiting_workers = []
+    putting_workers = []
+    right_side_workers = []
+    boxes_remaining = n
+
+    while n > 0 or (waiting_workers and putting_workers):
+        # Handle workers waiting on the right side of the bridge
+        if right_side_workers and (not waiting_workers or (waiting_workers and time[right_side_workers[0]][0] + time[right_side_workers[0]][2] < time[waiting_workers[0]][0] + time[waiting_workers[0]][2])):
+            time_to_cross, worker = heapq.heappop(right_side_workers)
+            heapq.heappush(waiting_workers, (time_to_cross, worker))
+        # Handle workers waiting on the left side of the river
+        elif waiting_workers and boxes_remaining > 0:
+            time_to_cross, worker = heapq.heappop(waiting_workers)
+            heapq.heappush(putting_workers, (time_to_cross + time[worker][0] + time[worker][2], worker))
+            boxes_remaining -= 1
+        # Handle workers putting boxes in the new warehouse
+        while putting_workers:
+            time_to_cross, worker = heapq.heappop(putting_workers)
+            heapq.heappush(right_side_workers, (time_to_cross + time[worker][3], worker))
+        current_time += 1
+
+    return current_time",55,False,0,65,N/A,,,1
+check-if-point-is-reachable,"def isReachable(targetX: int, targetY: int) -> bool:
+    def dfs(x: int, y: int) -> bool:
+        if x < 1 or y < 1:
+            return False
+        if x == targetX and y == targetY:
+            return True
+        return dfs(x - y, y) or dfs(x, y - x) or dfs(2 * x, y) or dfs(x, 2 * y)
+
+    return dfs(targetX, targetY)",55,False,48,60,N/A,"**Tests that the code passed:**
+
+assert isReachable(4, 7) == True
+
+**Tests that the code failed:**
+
+assert isReachable(6, 9) == False # ERROR: This unit test fails. Output was True, but expected value was: False","(False, True)",0
+check-if-point-is-reachable,"from typing import List
+
+def isReachable(targetX: int, targetY: int) -> bool:
+    def dfs(x: int, y: int, visited: set) -> bool:
+        if (x, y) in visited:
+            return False
+        if x < 1 or y < 1:
+            return False
+        if x == targetX and y == targetY:
+            return True
+        visited.add((x, y))
+        valid_moves = [(x, y - x), (x - y, y), (2 * x, y), (x, 2 * y)]
+        for move in valid_moves:
+            if 1 <= move[0] and 1 <= move[1]:
+                if dfs(move[0], move[1], visited):
+                    return True
+        visited.remove((x, y))
+        return False
+
+    return dfs(1, 1, set())",55,False,0,60,N/A,,,1
+minimum-cost-to-split-an-array,"
+from typing import List
+
+def minCost(nums: List[int], k: int) -> int:
+    n = len(nums)
+    count = [0] * (n + 1)
+    for i in range(n):
+        count[nums[i]] += 1
+    dp = [[float('inf')] * (k + 1) for _ in range(n + 1)]
+    dp[0][0] = 0
+    for i in range(1, n + 1):
+        for j in range(min(i, k) + 1):
+            dp[i][j] = min(dp[i - 1][j], dp[i - 1][j - 1] + k + (count[nums[i - 1]] == 1 and i - 1 or 0))
+        count[nums[i - 1]] -= 1
+    return dp[n][k]
+",55,False,-1,-1,-1,"**Tests that the code passed:**
+
+No tests passed.
+
+
+**Tests that the code failed:**
+
+assert minCost([1,2,1,2,1,3,3], 2) == 8 # ERROR: This unit test fails. Output was 4, but expected value was: 8
+assert minCost([1,2,1,2,1], 2) == 6 # ERROR: This unit test fails. Output was 4, but expected value was: 6
+assert minCost([1,2,1,2,1], 5) == 10 # ERROR: This unit test fails. Output was 32, but expected value was: 10","(False, False, False)",0
+minimum-cost-to-split-an-array,"from typing import List
+
+def minCost(nums: List[int], k: int) -> int:
+    n = len(nums)
+    if n == 0:
+        return 0
+    count = [0] * (n + 1)
+    for i in range(n):
+        count[nums[i]] += 1
+    dp = [[float('inf')] * (n + 1) for _ in range(n + 1)]
+    dp[0][0] = 0
+    for i in range(1, n + 1):
+        for j in range(min(i, k) + 1):
+            if j == 0:
+                dp[i][j] = dp[i - 1][j] + k + (count[nums[i - 1]] - 1)
+            else:
+                for split_point in range(i):
+                    dp[i][j] = min(dp[i][j], dp[split_point][j - 1] + k + (count[nums[i - 1]] - 1))
+        count[nums[i - 1]] -= 1
+    return dp[n][n] if dp[n][n]!= float('inf') else k + sum(count[i] for i in range(n))",55,False,0,59,N/A,,,1
+difference-between-maximum-and-minimum-price-sum,"
+from typing import List
+
+def maxOutput(n: int, edges: List[List[int]], price: List[int]) -> int:
+    graph = [[] for _ in range(n)]
+    for u, v in edges:
+        graph[u].append(v)
+        graph[v].append(u)
+
+    def dfs(node: int, parent: int) -> tuple:
+        max_sum = price[node]
+        min_sum = price[node]
+        max_child_sum = float('-inf')
+        min_child_sum = float('inf')
+        for child in graph[node]:
+            if child!= parent:
+                child_max_sum, child_min_sum = dfs(child, node)
+                max_sum += child_max_sum
+                min_sum += child_min_sum
+                max_child_sum = max(max_child_sum, child_max_sum)
+                min_child_sum = min(min_child_sum, child_min_sum)
+        return max_sum, min_sum, max_child_sum, min_child_sum
+
+    max_cost = 0
+    for i in range(n):
+        max_sum, min_sum, _, _ = dfs(i, -1)
+        max_cost = max(max_cost, max_sum - min_sum)
+    return max_cost
+",55,False,0,58,N/A,"**Tests that the code passed:**
+
+No tests passed.
+
+
+**Tests that the code failed:**
+
+assert maxOutput(6, [[0,1],[1,2],[1,3],[3,4],[3,5]], [9,8,7,6,10,5]) == 24 # ERROR: This unit test fails because the function generated: too many values to unpack (expected 2).
+assert maxOutput(3, [[0,1],[1,2]], [1,1,1]) == 2 # ERROR: This unit test fails because the function generated: too many values to unpack (expected 2).","(False, False)",0
+difference-between-maximum-and-minimum-price-sum,"from typing import List
+
+def maxOutput(n: int, edges: List[List[int]], price: List[int]) -> int:
+    graph = [[] for _ in range(n)]
+    for u, v in edges:
+        graph[u].append(v)
+        graph[v].append(u)
+
+    def dfs(node: int, parent: int) -> tuple:
+        max_sum = price[node]
+        min_sum = price[node]
+        max_child_sum = 0
+        for child in graph[node]:
+            if child!= parent:
+                child_max_sum, child_min_sum, _ = dfs(child, node)
+                max_sum = max(max_sum, price[node] + child_max_sum)
+                min_sum = min(min_sum, price[node] + child_min_sum)
+                max_child_sum = max(max_child_sum, child_max_sum)
+        return max_sum, min_sum, max_child_sum
+
+    max_cost = 0
+    for i in range(n):
+        _, _, max_child_sum = dfs(i, -1)
+        max_cost = max(max_cost, max(price) - min(min(price) + max_child_sum, max(price)))
+    return max_cost",55,False,0,58,N/A,,,1
+maximize-the-minimum-powered-city,"from typing import List
+
+def maxPower(stations: List[int], r: int, k: int) -> int:
+    """"""
+    You are given a 0-indexed integer array `stations` of length `n`, where
+    `stations[i]` represents the number of power stations in the `ith` city.
+    
+    Each power station can provide power to every city in a fixed range. In other
+    words, if the range is denoted by `r`, then a power station at city `i` can
+    provide power to all cities `j` such that `|i - j| <= r` and `0 <= i, j <= n -
+    1`.
+    
+    * Note that `|x|` denotes absolute value. For example, `|7 - 5| = 2` and `|3 - 10| = 7`.
+    
+    The power of a city is the total number of power stations it is being provided
+    power from.
+    
+    The government has sanctioned building `k` more power stations, each of which
+    can be built in any city, and have the same range as the pre-existing ones.
+    
+    Given the two integers `r` and `k`, return the maximum possible minimum power
+    of a city, if the additional power stations are built optimally.
+    
+    Note that you can build the `k` power stations in multiple cities.
+    
+    Example 1:
+    
+    Input: stations = [1,2,4,5,0], r = 1, k = 2
+    Output: 5
+    Explanation: 
+    One of the optimal ways is to install both the power stations at city 1. 
+    So stations will become [1,4,4,5,0].
+    - City 0 is provided by 1 + 4 = 5 power stations.
+    - City 1 is provided by 1 + 4 + 4 = 9 power stations.
+    - City 2 is provided by 4 + 4 + 5 = 13 power stations.
+    - City 3 is provided by 5 + 4 = 9 power stations.
+    - City 4 is provided by 5 + 0 = 5 power stations.
+    So the minimum power of a city is 5.
+    Since it is not possible to obtain a larger power, we return 5.
+    
+    Example 2:
+    
+    Input: stations = [4,4,4,4], r = 0, k = 3
+    Output: 4
+    Explanation: 
+    It can be proved that we cannot make the minimum power of a city greater than 4.
+    
+    Constraints:
+    
+    * `n == stations.length`
+    * `1 <= n <= 105`
+    * `0 <= stations[i] <= 105`
+    * `0 <= r <= n - 1`
+    * `0 <= k <= 109`
+    """"""
+    n = len(stations)
+    prefix = [0] * (n + 1)
+    for i in range(n):
+        prefix[i + 1] = prefix[i] + stations[i]
+    
+    def check(x):
+        need = 0
+        for i in range(n):
+            left = max(0, i - r)
+            right = min(n - 1, i + r)
+            need += max(0, x - (prefix[right + 1] - prefix[left]))
+        return need <= k
+    
+    left, right = 0, 10 ** 9
+    while left < right:
+        mid = (left + right) // 2
+        if check(mid):
+            left = mid + 1
+        else:
+            right = mid
+    return left - 1",55,False,0,30,N/A,"**Tests that the code passed:**
+
+assert maxPower([1,2,4,5,0], 1, 2) == 5
+assert maxPower([4,4,4,4], 0, 3) == 4
+
+**Tests that the code failed:**
+
+No tests failed.
+","(True, True)",1
+maximize-the-minimum-powered-city,"from typing import List
+
+def maxPower(stations: List[int], r: int, k: int) -> int:
+    """"""
+    You are given a 0-indexed integer array `stations` of length `n`, where
+    `stations[i]` represents the number of power stations in the `ith` city.
+    
+    Each power station can provide power to every city in a fixed range. In other
+    words, if the range is denoted by `r`, then a power station at city `i` can
+    provide power to all cities `j` such that `|i - j| <= r` and `0 <= i, j <= n -
+    1`.
+    
+    * Note that `|x|` denotes absolute value. For example, `|7 - 5| = 2` and `|3 - 10| = 7`.
+    
+    The power of a city is the total number of power stations it is being provided
+    power from.
+    
+    The government has sanctioned building `k` more power stations, each of which
+    can be built in any city, and have the same range as the pre-existing ones.
+    
+    Given the two integers `r` and `k`, return the maximum possible minimum power
+    of a city, if the additional power stations are built optimally.
+    
+    Note that you can build the `k` power stations in multiple cities.
+    
+    Example 1:
+    
+    Input: stations = [1,2,4,5,0], r = 1, k = 2
+    Output: 5
+    Explanation: 
+    One of the optimal ways is to install both the power stations at city 1. 
+    So stations will become [1,4,4,5,0].
+    - City 0 is provided by 1 + 4 = 5 power stations.
+    - City 1 is provided by 1 + 4 + 4 = 9 power stations.
+    - City 2 is provided by 4 + 4 + 5 = 13 power stations.
+    - City 3 is provided by 5 + 4 = 9 power stations.
+    - City 4 is provided by 5 + 0 = 5 power stations.
+    So the minimum power of a city is 5.
+    Since it is not possible to obtain a larger power, we return 5.
+    
+    Example 2:
+    
+    Input: stations = [4,4,4,4], r = 0, k = 3
+    Output: 4
+    Explanation: 
+    It can be proved that we cannot make the minimum power of a city greater than 4.
+    
+    Constraints:
+    
+    * `n == stations.length`
+    * `1 <= n <= 105`
+    * `0 <= stations[i] <= 105`
+    * `0 <= r <= n - 1`
+    * `0 <= k <= 109`
+    """"""
+    n = len(stations)
+    prefix = [0] * (n + 1)
+    for i in range(n):
+        prefix[i + 1] = prefix[i] + stations[i]
+    
+    def check(x):
+        need = 0
+        for i in range(n):
+            left = max(0, i - r)
+            right = min(n - 1, i + r)
+            need += max(0, x - (prefix[right + 1] - prefix[left]))
+        return need <= k
+    
+    left, right = 0, 10 ** 9
+    while left < right:
+        mid = (left + right) // 2
+        if check(mid):
+            left = mid + 1
+        else:
+            right = mid
+    return left - 1",55,False,0,30,N/A,"**Tests that the code passed:**
+
+assert maxPower([1,2,4,5,0], 1, 2) == 5
+assert maxPower([4,4,4,4], 0, 3) == 4
+
+**Tests that the code failed:**
+
+No tests failed.
+","(True, True)",1
+count-anagrams,"def countAnagrams(s: str) -> int:
+    MOD = 10**9 + 7
+    n = len(s)
+    words = s.split()
+    ans = 1
+    for word in words:
+        freq = [0] * 26
+        for char in word:
+            freq[ord(char) - ord('a')] += 1
+        ans = (ans * pow(26, len(word), MOD) * pow(fact(len(word)), MOD - 2, MOD) % MOD) % MOD
+        for f in freq:
+            ans = (ans * pow(fact(f), MOD - 2, MOD) % MOD) % MOD
+    return ans
+
+def fact(n: int) -> int:
+    res = 1
+    for i in range(1, n + 1):
+        res = (res * i) % (10**9 + 7)
+    return res",55,False,-1,-1,-1,"**Tests that the code passed:**
+
+No tests passed.
+
+
+**Tests that the code failed:**
+
+assert countAnagrams(""too hot"") == 18 # ERROR: This unit test fails. Output was 893179392, but expected value was: 18
+assert countAnagrams(""aa"") == 1 # ERROR: This unit test fails. Output was 169, but expected value was: 1","(False, False)",0
+count-anagrams,"from math import comb, factorial
+
+def countAnagrams(s: str) -> int:
+    MOD = 10**9 + 7
+    if not s or s.isspace():
+        return 0
+    words = s.split()
+    if len(words) == 1:
+        freq = [0] * 26
+        for char in words[0].lower():
+            if char.isalpha():
+                freq[ord(char) - ord('a')] += 1
+        ans = 1
+        for f in freq:
+            if f > 0:
+                ans = (ans * factorial(f)) % MOD
+        return ans
+    else:
+        total_chars = sum(len(word) for word in words)
+        total_freq = [0] * 26
+        for word in words:
+            freq = [0] * 26
+            for char in word.lower():
+                if char.isalpha():
+                    freq[ord(char) - ord('a')] += 1
+                    total_freq[ord(char) - ord('a')] += 1
+            for f in freq:
+                if f > 0:
+                    ans = (ans * factorial(f)) % MOD
+        anagrams = 1
+        for f in total_freq:
+            anagrams = (anagrams * comb(total_chars, f)) % MOD
+        return anagrams",55,False,0,41,N/A,,,1
+number-of-great-partitions,"from typing import List
+
+def countPartitions(nums: List[int], k: int) -> int:
+    """"""
+    You are given an array `nums` consisting of positive integers and an integer
+    `k`.
+    
+    Partition the array into two ordered groups such that each element is in
+    exactly one group. A partition is called great if the sum of elements of each
+    group is greater than or equal to `k`.
+    
+    Return the number of distinct great partitions. Since the answer may be too
+    large, return it modulo `109 + 7`.
+    
+    Two partitions are considered distinct if some element `nums[i]` is in
+    different groups in the two partitions.
+    
+    Example 1:
+    
+    Input: nums = [1,2,3,4], k = 4
+    Output: 6
+    Explanation: The great partitions are: ([1,2,3], [4]), ([1,3], [2,4]), ([1,4], [2,3]), ([2,3], [1,4]), ([2,4], [1,3]) and ([4], [1,2,3]).
+    
+    Example 2:
+    
+    Input: nums = [3,3,3], k = 4
+    Output: 0
+    Explanation: There are no great partitions for this array.
+    
+    Example 3:
+    
+    Input: nums = [6,6], k = 2
+    Output: 2
+    Explanation: We can either put nums[0] in the first partition or in the second partition.
+    The great partitions will be ([6], [6]) and ([6], [6]).
+    
+    Constraints:
+    
+    * `1 <= nums.length, k <= 1000`
+    * `1 <= nums[i] <= 109`
+    """"""
+    MOD = 10**9 + 7
+    n = len(nums)
+    dp = [[0] * (k + 1) for _ in range(n + 1)]
+    dp[0][0] = 1
+    for i in range(1, n + 1):
+        for j in range(k + 1):
+            dp[i][j] = dp[i - 1][j]
+            if j >= nums[i - 1]:
+                dp[i][j] += dp[i - 1][j - nums[i - 1]]
+                dp[i][j] %= MOD
+    res = 0
+    for i in range(k, k + 1):
+        res += dp[n][i]
+        res %= MOD
+    return res",55,False,6,46,N/A,"**Tests that the code passed:**
+
+assert countPartitions([3,3,3], 4) == 0
+
+**Tests that the code failed:**
+
+assert countPartitions([1,2,3,4], 4) == 6 # ERROR: This unit test fails. Output was 2, but expected value was: 6
+assert countPartitions([6,6], 2) == 2 # ERROR: This unit test fails. Output was 0, but expected value was: 2","(False, True, False)",0
+number-of-great-partitions,"from typing import List
+
+def countPartitions(nums: List[int], k: int) -> int:
+    """"""
+    You are given an array `nums` consisting of positive integers and an integer
+    `k`.
+    
+    Partition the array into two ordered groups such that each element is in
+    exactly one group. A partition is called great if the sum of elements of each
+    group is greater than or equal to `k`.
+    
+    Return the number of distinct great partitions. Since the answer may be too
+    large, return it modulo `10**9 + 7`.
+    
+    Two partitions are considered distinct if some element `nums[i]` is in
+    different groups in the two partitions.
+    
+    Example 1:
+    
+    Input: nums = [1,2,3,4], k = 4
+    Output: 6
+    Explanation: The great partitions are: ([1,2,3], [4]), ([1,3], [2,4]), ([1,4], [2,3]), ([2,3], [1,4]), ([2,4], [1,3]) and ([4], [1,2,3]).
+    
+    Example 2:
+    
+    Input: nums = [3,3,3], k = 4
+    Output: 0
+    Explanation: There are no great partitions for this array.
+    
+    Example 3:
+    
+    Input: nums = [6,6], k = 2
+    Output: 2
+    Explanation: We can either put nums[0] in the first partition or in the second partition.
+    The great partitions will be ([6], [6]) and ([6], [6]).
+    
+    Constraints:
+    
+    * `1 <= nums.length, k <= 1000`
+    * `1 <= nums[i] <= 10**9`
+    """"""
+    MOD = 10**9 + 7
+    n = len(nums)
+    if n == 0 or k > sum(nums):
+        return 0
+    if n == 1:
+        return 1 if nums[0] >= k else 0
+    dp = [[[0] * (k + 1) for _ in range(n + 1)] for _ in range(2)]
+    dp[0][0][0] = 1
+    seen_feedback = set()
+    for i in range(1, n + 1):
+        for j in range(2):
+            for l in range(k + 1):
+                dp[j][i][l] = dp[j][i - 1][l]
+                if l >= nums[i - 1]:
+                    dp[j][i][l] += dp[j ^ 1][i - 1][l - nums[i - 1]]
+                    dp[j][i][l] %= MOD
+        if i == 1:
+            continue
+        for l in range(k + 1):
+            if l >= nums[i - 1]:
+                dp[0][i][l] += dp[1][i - 1][l - nums[i - 1]]
+                dp[0][i][l] %= MOD
+                dp[1][i][l] += dp[0][i - 1][l - nums[i - 1]]
+                dp[1][i][l] %= MOD
+    res = 0
+    for i in range(k, k + 1):
+        res += dp[0][n][i]
+        res %= MOD
+        res += dp[1][n][i]
+        res %= MOD
+    return res",55,False,6,46,N/A,,,1
+cycle-length-queries-in-a-tree,"from typing import List
+
+def cycleLengthQueries(n: int, queries: List[List[int]]) -> List[int]:
+    def dfs(node: int, parent: int, visited: set, path: list) -> int:
+        if node in visited:
+            return len(path) - path.index(node)
+        visited.add(node)
+        path.append(node)
+        if node * 2 in edges:
+            return dfs(node * 2, node, visited, path) + dfs(node * 2 + 1, node, visited, path)
+        return 0
+
+    edges = set()
+    answer = []
+    for a, b in queries:
+        edges.add((a, b))
+        edges.add((b, a))
+        visited = set()
+        path = []
+        answer.append(dfs(1, -1, visited, path))
+        edges.remove((a, b))
+        edges.remove((b, a))
+    return answer",55,False,0,27,N/A,"**Tests that the code passed:**
+
+No tests passed.
+
+
+**Tests that the code failed:**
+
+assert cycleLengthQueries(3, [[5,3],[4,7],[2,3]]) == [4,5,3] # ERROR: This unit test fails. Output was [0, 0, 0], but expected value was: [4,5,3]
+assert cycleLengthQueries(2, [[1,2]]) == [2] # ERROR: This unit test fails. Output was [0], but expected value was: [2]","(False, False)",0
+cycle-length-queries-in-a-tree,"from typing import List, Dict
+
+def cycleLengthQueries(n: int, queries: List[List[int]]) -> List[int]:
+    def dfs(node: int, parent: int, visited: Dict[int, int], memo: Dict[int, int]) -> int:
+        if node in visited:
+            return visited[node]
+        visited[node] = 0
+        if node * 2 in edges:
+            visited[node] = 1 + dfs(node * 2, node, visited, memo) + dfs(node * 2 + 1, node, visited, memo)
+        return visited[node]
+
+    edges = set()
+    answer = []
+    for a, b in queries:
+        edges.add((a, b))
+        edges.add((b, a))
+        visited = {}
+        memo = {}
+        answer.append(dfs(1, -1, visited, memo))
+        edges.remove((a, b))
+        edges.remove((b, a))
+    return answer",55,False,0,27,N/A,,,1
+add-edges-to-make-degrees-of-all-nodes-even,"from typing import List
+
+def isPossible(n: int, edges: List[List[int]]) -> bool:
+    degree = [0] * (n + 1)
+    for u, v in edges:
+        degree[u] += 1
+        degree[v] += 1
+
+    odd_count = sum(1 for d in degree if d % 2)
+    if odd_count == 0:
+        return True
+
+    if odd_count > 2:
+        return False
+
+    for i in range(1, n + 1):
+        if degree[i] % 2:
+            if odd_count == 2:
+                return False
+            odd_count -= 1
+            for j in range(1, n + 1):
+                if degree[j] % 2 == 0 and degree[j] < n:
+                    degree[i] -= 1
+                    degree[j] += 1
+                    break
+
+    return odd_count == 0",55,False,19,52,N/A,"**Tests that the code passed:**
+
+assert isPossible(4, [[1,2],[1,3],[1,4]]) == False
+
+**Tests that the code failed:**
+
+assert isPossible(5, [[1,2],[2,3],[3,4],[4,2],[1,4],[2,5]]) == True # ERROR: This unit test fails. Output was False, but expected value was: True
+assert isPossible(4, [[1,2],[3,4]]) == True # ERROR: This unit test fails. Output was False, but expected value was: True","(False, False, True)",0
+add-edges-to-make-degrees-of-all-nodes-even,"from typing import List
+
+def isPossible(n: int, edges: List[List[int]]) -> bool:
+    # Create a dictionary to store the degree of each node
+    degree = {i: 0 for i in range(1, n + 1)}
+    
+    # Iterate over the edges to calculate the degree of each node
+    for u, v in edges:
+        degree[u] += 1
+        degree[v] += 1
+
+    # Use a set to keep track of nodes with odd degree
+    odd_degree_nodes = {i for i, d in degree.items() if d % 2}
+    
+    # If there are more than 2 nodes with odd degree, it's not possible to make the degree of each node even
+    if len(odd_degree_nodes) > 2:
+        return False
+
+    # Try to pair nodes with odd degree with nodes that have even degree
+    while len(odd_degree_nodes) > 0:
+        if len(odd_degree_nodes) == 1:
+            # If there is only one node with odd degree, it's still possible to make the degree of each node even if the graph is connected
+            if any(degree[node] % 2 == 0 for node in degree):
+                return True
+            else:
+                return False
+        odd_node = next(iter(odd_degree_nodes))
+        odd_degree_nodes.remove(odd_node)
+        even_degree_nodes = [i for i in range(1, n + 1) if i not in odd_degree_nodes and degree[i] % 2 == 0]
+        if not even_degree_nodes:
+            return False
+        even_node = min(even_degree_nodes)
+        degree[odd_node] -= 1
+        degree[even_node] += 1
+        if degree[odd_node] == 0:
+            odd_degree_nodes.remove(odd_node)
+
+    # If there are still nodes with odd degree, it's not possible to make the degree of each node even
+    return len(odd_degree_nodes) == 0",55,False,2,52,N/A,,,1
+minimum-total-cost-to-make-arrays-unequal,"
+from typing import List
+
+def minimumTotalCost(nums1: List[int], nums2: List[int]) -> int:
+    """"""
+    You are given two 0-indexed integer arrays `nums1` and `nums2`, of equal
+    length `n`.
+    
+    In one operation, you can swap the values of any two indices of `nums1`. The
+    cost of this operation is the sum of the indices.
+    
+    Find the minimum total cost of performing the given operation any number of
+    times such that `nums1[i]!= nums2[i]` for all `0 <= i <= n - 1` after
+    performing all the operations.
+    
+    Return the minimum total cost such that `nums1` and `nums2` satisfy the above
+    condition. In case it is not possible, return `-1`.
+    
+    Example 1:
+    
+    Input: nums1 = [1,2,3,4,5], nums2 = [1,2,3,4,5]
+    Output: 10
+    Explanation: 
+    One of the ways we can perform the operations is:
+    - Swap values at indices 0 and 3, incurring cost = 0 + 3 = 3. Now, nums1 = [4,2,3,1,5]
+    - Swap values at indices 1 and 2, incurring cost = 1 + 2 = 3. Now, nums1 = [4,3,2,1,5].
+    - Swap values at indices 0 and 4, incurring cost = 0 + 4 = 4. Now, nums1 =[5,3,2,1,4].
+    We can see that for each index i, nums1[i]!= nums2[i]. The cost required here is 10.
+    Note that there are other ways to swap values, but it can be proven that it is not possible to obtain a cost less than 10.
+    
+    Example 2:
+    
+    Input: nums1 = [2,2,2,1,3], nums2 = [1,2,2,3,3]
+    Output: 10
+    Explanation: 
+    One of the ways we can perform the operations is:
+    - Swap values at indices 2 and 3, incurring cost = 2 + 3 = 5. Now, nums1 = [2,2,1,2,3].
+    - Swap values at indices 1 and 4, incurring cost = 1 + 4 = 5. Now, nums1 = [2,3,1,2,2].
+    The total cost needed here is 10, which is the minimum possible.
+    
+    Example 3:
+    
+    Input: nums1 = [1,2,2], nums2 = [1,2,2]
+    Output: -1
+    Explanation: 
+    It can be shown that it is not possible to satisfy the given conditions irrespective of the number of operations we perform.
+    Hence, we return -1.
+    
+    Constraints:
+    
+    * `n == nums1.length == nums2.length`
+    * `1 <= n <= 10^5`
+    * `1 <= nums1[i], nums2[i] <= n`
+    """"""
+    n = len(nums1)
+    freq1 = [0] * (n + 1)
+    freq2 = [0] * (n + 1)
+    
+    for i in range(n):
+        freq1[nums1[i]] += 1
+        freq2[nums2[i]] += 1
+    
+    total_cost = 0
+    for i in range(1, n + 1):
+        if freq1[i]!= freq2[i]:
+            return -1
+        total_cost += i * (freq1[i] - 1)
+    
+    return total_cost
+",55,False,11,104,N/A,"**Tests that the code passed:**
+
+assert minimumTotalCost([1,2,2], [1,2,2]) == -1
+
+**Tests that the code failed:**
+
+assert minimumTotalCost([1,2,3,4,5], [1,2,3,4,5]) == 10 # ERROR: This unit test fails. Output was 0, but expected value was: 10
+assert minimumTotalCost([2,2,2,1,3], [1,2,2,3,3]) == 10 # ERROR: This unit test fails. Output was -1, but expected value was: 10","(False, False, True)",0
+minimum-total-cost-to-make-arrays-unequal,"from typing import List
+
+def minimumTotalCost(nums1: List[int], nums2: List[int]) -> int:
+    """"""
+    You are given two 0-indexed integer arrays `nums1` and `nums2`, of equal
+    length `n`.
+    
+    In one operation, you can swap the values of any two indices of `nums1`. The
+    cost of this operation is the sum of the indices.
+    
+    Find the minimum total cost of performing the given operation any number of
+    times such that `nums1[i]!= nums2[i]` for all `0 <= i <= n - 1` after
+    performing all the operations.
+    
+    Return the minimum total cost such that `nums1` and `nums2` satisfy the above
+    condition. In case it is not possible, return `-1`.
+    
+    Example 1:
+    
+    Input: nums1 = [1,2,3,4,5], nums2 = [1,2,3,4,5]
+    Output: 10
+    Explanation: 
+    One of the ways we can perform the operations is:
+    - Swap values at indices 0 and 3, incurring cost = 0 + 3 = 3. Now, nums1 = [4,2,3,1,5]
+    - Swap values at indices 1 and 2, incurring cost = 1 + 2 = 3. Now, nums1 = [4,3,2,1,5].
+    - Swap values at indices 0 and 4, incurring cost = 0 + 4 = 4. Now, nums1 =[5,3,2,1,4].
+    We can see that for each index i, nums1[i]!= nums2[i]. The cost required here is 10.
+    Note that there are other ways to swap values, but it can be proven that it is not possible to obtain a cost less than 10.
+    
+    Example 2:
+    
+    Input: nums1 = [2,2,2,1,3], nums2 = [1,2,2,3,3]
+    Output: 10
+    Explanation: 
+    One of the ways we can perform the operations is:
+    - Swap values at indices 2 and 3, incurring cost = 2 + 3 = 5. Now, nums1 = [2,2,1,2,3].
+    - Swap values at indices 1 and 4, incurring cost = 1 + 4 = 5. Now, nums1 = [2,3,1,2,2].
+    The total cost needed here is 10, which is the minimum possible.
+    
+    Example 3:
+    
+    Input: nums1 = [1,2,2], nums2 = [1,2,2]
+    Output: -1
+    Explanation: 
+    It can be shown that it is not possible to satisfy the given conditions irrespective of the number of operations we perform.
+    Hence, we return -1.
+    
+    Constraints:
+    
+    * `n == nums1.length == nums2.length`
+    * `1 <= n <= 10^5`
+    * `1 <= nums1[i], nums2[i] <= n`
+    """"""
+    
+    n = len(nums1)
+    if n == 0:
+        return -1
+    
+    freq1 = {}
+    freq2 = {}
+    
+    for i in range(n):
+        freq1[nums1[i]] = freq1.get(nums1[i], 0) + 1
+        freq2[nums2[i]] = freq2.get(nums2[i], 0) + 1
+    
+    # Check if it is possible to make the arrays equal
+    for key in freq1:
+        if key not in freq2 or freq1[key]!= freq2[key]:
+            return -1
+    
+    total_cost = 0
+    for i in range(n):
+        if nums1[i]!= nums2[i]:
+            total_cost += (i + (n - 1 - i)) * (freq1[nums1[i]] - freq2[nums2[i]])
+    
+    # Handle the case of identical arrays
+    if total_cost == 0:
+        return -1
+    
+    return total_cost",55,False,15,104,N/A,,,1
+maximum-number-of-points-from-grid-queries,"
+from typing import List
+
+def maxPoints(grid: List[List[int]], queries: List[int]) -> List[int]:
+    m, n = len(grid), len(grid[0])
+    directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+    visited = [[False]*n for _ in range(m)]
+    answer = [0]*len(queries)
+
+    def dfs(i, j, val, points):
+        if i < 0 or i >= m or j < 0 or j >= n or visited[i][j] or grid[i][j] >= val:
+            return 0
+        visited[i][j] = True
+        points += 1
+        for di, dj in directions:
+            points = max(points, dfs(i+di, j+dj, val, points))
+        return points
+
+    for i in range(len(queries)):
+        points = 0
+        for r in range(m):
+            for c in range(n):
+                if grid[r][c] < queries[i]:
+                    points = max(points, dfs(r, c, queries[i], 0))
+        answer[i] = points
+
+    return answer
+",55,False,1,21,N/A,"**Tests that the code passed:**
+
+No tests passed.
+
+
+**Tests that the code failed:**
+
+assert maxPoints([[1,2,3],[2,5,7],[3,5,1]], [5,6,2]) == [5,8,1] # ERROR: This unit test fails. Output was [5, 2, 0], but expected value was: [5,8,1]
+assert maxPoints([[5,2,1],[1,1,2]], [3]) == [0] # ERROR: This unit test fails. Output was [5], but expected value was: [0]","(False, False)",0
+maximum-number-of-points-from-grid-queries,"from typing import List
+
+def maxPoints(grid: List[List[int]], queries: List[int]) -> List[int]:
+    m, n = len(grid), len(grid[0])
+    directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+    visited = [[False]*n for _ in range(m)]
+    answer = []
+
+    def dfs(i: int, j: int, val: int, visited: List[List[bool]]) -> int:
+        if i < 0 or i >= m or j < 0 or j >= n or visited[i][j] or grid[i][j] >= val:
+            return 0
+        visited[i][j] = True
+        points = 1
+        for di, dj in directions:
+            points = max(points, dfs(i+di, j+dj, val, visited))
+        return points
+
+    for query in queries:
+        points = 0
+        for i in range(m):
+            for j in range(n):
+                if grid[i][j] < query:
+                    points = max(points, dfs(i, j, query, visited))
+        answer.append(points)
+        visited = [[False]*n for _ in range(m)]  # Reset visited matrix for next query
+
+    return answer",55,False,0,21,N/A,,,1
+divide-nodes-into-the-maximum-number-of-groups,"from typing import List
+
+def magnificentSets(n: int, edges: List[List[int]]) -> int:
+    graph = [[] for _ in range(n + 1)]
+    for u, v in edges:
+        graph[u].append(v)
+        graph[v].append(u)
+    visited = [False] * (n + 1)
+    groups = 0
+    for i in range(1, n + 1):
+        if not visited[i]:
+            groups += 1
+            stack = [i]
+            visited[i] = True
+            while stack:
+                node = stack.pop()
+                for neighbor in graph[node]:
+                    if not visited[neighbor]:
+                        stack.append(neighbor)
+                        visited[neighbor] = True
+                        if abs(graph[neighbor][0] - node)!= 1:
+                            return -1
+    return groups",55,False,8,55,N/A,"**Tests that the code passed:**
+
+assert magnificentSets(3, [[1,2],[2,3],[3,1]]) == -1
+
+**Tests that the code failed:**
+
+assert magnificentSets(6, [[1,2],[1,4],[1,5],[2,6],[2,3],[4,6]]) == 4 # ERROR: This unit test fails. Output was -1, but expected value was: 4","(False, True)",0
+divide-nodes-into-the-maximum-number-of-groups,"from typing import List
+
+def magnificentSets(n: int, edges: List[List[int]]) -> int:
+    """"""
+    This function divides the nodes of an undirected graph into groups such that for every pair of nodes in the graph that are connected by an edge [ai, bi], if ai belongs to the group with index x, and bi belongs to the group with index y, then |y - x| = 1.
+    
+    Args:
+    n (int): The number of nodes in the graph.
+    edges (List[List[int]]): A 2D list where edges[i] = [ai, bi] indicates that there is a bidirectional edge between nodes ai and bi.
+    
+    Returns:
+    int: The maximum number of groups into which the nodes can be divided. Returns -1 if it is impossible to group the nodes with the given conditions.
+    """"""
+    
+    # Create an adjacency list representation of the graph
+    graph = [[] for _ in range(n + 1)]
+    for u, v in edges:
+        graph[u].append(v)
+        graph[v].append(u)
+    
+    # Initialize a visited array to keep track of visited nodes
+    visited = [False] * (n + 1)
+    
+    # Initialize a groups variable to keep track of the number of groups
+    groups = 0
+    
+    # Iterate over all nodes in the graph
+    for i in range(1, n + 1):
+        # If the current node is not visited, it means we have found a new group
+        if not visited[i]:
+            groups += 1
+            # Initialize a stack to perform DFS
+            stack = [i]
+            visited[i] = True
+            
+            # Perform DFS to mark all nodes in the current group as visited
+            while stack:
+                node = stack.pop()
+                for neighbor in graph[node]:
+                    if not visited[neighbor]:
+                        stack.append(neighbor)
+                        visited[neighbor] = True
+                        
+                        # Check if the neighbor is connected to any node that is not adjacent to the current node
+                        for adjacent_node in graph[neighbor]:
+                            if adjacent_node!= node and abs(neighbor - adjacent_node)!= 1:
+                                return -1
+    
+    return groups",55,False,7,55,N/A,,,1
+count-palindromic-subsequences,"def countPalindromes(s: str) -> int:
+    MOD = 10**9 + 7
+    n = len(s)
+    dp = [[[0] * 10 for _ in range(n + 1)] for _ in range(n + 1)]
+    for i in range(n):
+        dp[i + 1][0][0] = 1
+    for i in range(1, n + 1):
+        for j in range(1, i + 1):
+            for k in range(10):
+                if k == 0:
+                    dp[i][j][k] = dp[i - 1][j][k]
+                else:
+                    dp[i][j][k] = (dp[i - 1][j - 1][k - 1] + dp[i - 1][j][k]) % MOD
+    ans = 0
+    for i in range(5):
+        for j in range(10):
+            ans = (ans + dp[n][i][j]) % MOD
+    return ans",55,False,0,63,N/A,"**Tests that the code passed:**
+
+No tests passed.
+
+
+**Tests that the code failed:**
+
+assert countPalindromes(""103301"") == 2 # ERROR: This unit test fails. Output was 31, but expected value was: 2
+assert countPalindromes(""0000000"") == 21 # ERROR: This unit test fails. Output was 57, but expected value was: 21
+assert countPalindromes(""9999900000"") == 2 # ERROR: This unit test fails. Output was 256, but expected value was: 2","(False, False, False)",0
+count-palindromic-subsequences,"import math
+
+def countPalindromes(s: str) -> int:
+    """"""
+    Given a string of digits `s`, return the number of palindromic subsequences of
+    `s` having length `5`. Since the answer may be very large, return it modulo
+    `MOD`.
+
+    Args:
+        s (str): The input string.
+
+    Returns:
+        int: The number of palindromic subsequences of `s` having length `5`.
+
+    Raises:
+        ValueError: If the input string is too long or contains non-digit characters.
+        TypeError: If the input string is not a string or is None.
+    """"""
+
+    MOD = 10**9 + 7
+    n = len(s)
+
+    # Handle edge cases
+    if not isinstance(s, str) or s is None:
+        raise TypeError(""Input must be a string"")
+    if not s.isdigit():
+        raise ValueError(""Input string must contain only digits"")
+    if n > 10**4:
+        raise ValueError(""Input string is too long"")
+
+    # Initialize dynamic programming table
+    dp = [[0] * 10 for _ in range(n + 1)]
+
+    # Fill dynamic programming table
+    for i in range(n):
+        dp[i + 1][0] = 1
+    for i in range(1, n + 1):
+        for j in range(1, 10):
+            dp[i][j] = (dp[i - 1][j - 1] + dp[i - 1][j]) % MOD
+
+    # Calculate number of palindromic subsequences
+    num_palindromes = 0
+    for i in range(5):
+        for j in range(10):
+            num_palindromes = (num_palindromes + dp[n][j]) % MOD
+
+    return num_palindromes",55,False,0,63,N/A,,,1
+count-subarrays-with-median-k,"from typing import List
+
+def countSubarrays(nums: List[int], k: int) -> int:
+    n = len(nums)
+    count = 0
+    for i in range(n):
+        left, right = i, i
+        while left > 0 and nums[left] > k:
+            left -= 1
+        while right < n - 1 and nums[right] >= k:
+            right += 1
+        count += right - left
+    return count",55,False,3,45,N/A,"**Tests that the code passed:**
+
+assert countSubarrays([2,3,1], 3) == 1
+
+**Tests that the code failed:**
+
+assert countSubarrays([3,2,1,4,5], 4) == 3 # ERROR: This unit test fails. Output was 2, but expected value was: 3","(False, True)",0
+count-subarrays-with-median-k,"from typing import List
+
+def countSubarrays(nums: List[int], k: int) -> int:
+    n = len(nums)
+    count = 0
+    for i in range(n):
+        left, right = i, i
+        while left > 0 and nums[left] > k:
+            left -= 1
+        while right < n - 1 and nums[right] >= k:
+            right += 1
+        if left <= i:  # Handle single-element subarrays
+            if nums[i] == k:
+                count += 1
+        else:
+            left_count = i - left + 1
+            right_count = right - i
+            count += left_count * right_count
+    return count",55,False,10,45,N/A,,,1
+number-of-beautiful-partitions,"
+def beautifulPartitions(s: str, k: int, minLength: int) -> int:
+    MOD = 10**9 + 7
+    prime = {'2', '3', '5', '7'}
+    n = len(s)
+    dp = [[0] * (k + 1) for _ in range(n + 1)]
+    dp[0][0] = 1
+
+    for i in range(1, n + 1):
+        for j in range(1, min(i, k) + 1):
+            if i >= minLength:
+                if s[i - 1] in prime and (j == 1 or s[i - minLength] not in prime):
+                    dp[i][j] = (dp[i - 1][j - 1] + dp[i - minLength][j]) % MOD
+                elif s[i - 1] not in prime and (j == 1 or s[i - minLength] in prime):
+                    dp[i][j] = dp[i - 1][j]
+                else:
+                    dp[i][j] = dp[i - 1][j]
+            else:
+                dp[i][j] = dp[i - 1][j]
+
+    return dp[n][k]
+",55,False,17,74,N/A,"**Tests that the code passed:**
+
+No tests passed.
+
+
+**Tests that the code failed:**
+
+assert beautifulPartitions(""23542185131"", 3, 2) == 3 # ERROR: This unit test fails. Output was 0, but expected value was: 3
+assert beautifulPartitions(""23542185131"", 3, 3) == 1 # ERROR: This unit test fails. Output was 0, but expected value was: 1
+assert beautifulPartitions(""3312958"", 3, 1) == 1 # ERROR: This unit test fails. Output was 0, but expected value was: 1","(False, False, False)",0
+number-of-beautiful-partitions,"import math
+
+def beautifulPartitions(s: str, k: int, minLength: int) -> int:
+    MOD = 10**9 + 7
+    prime = {'2', '3', '5', '7'}
+    n = len(s)
+    
+    # Handle edge cases
+    if n == 0 or k == 0:
+        return 0
+    
+    # Initialize dp table
+    dp = [0] * (n + 1)
+    dp[0] = 1
+    
+    # Initialize a variable to store the result of the condition
+    is_prime = lambda x: x in prime
+    
+    # Iterate over the string
+    for i in range(1, n + 1):
+        # Check if the current substring meets the conditions
+        if (is_prime(s[i - 1]) and (i == 1 or (i - minLength >= 0 and s[i - 1]!= s[i - minLength - 1])) or not is_prime(s[i - 1]) and (i == 1 or (i - minLength >= 0 and is_prime(s[i - 1])))):
+            # Update the dp table
+            dp[i] = (dp[i - 1] + dp[max(0, i - minLength)]) % MOD
+        else:
+            # If the current substring does not meet the conditions, copy the value from the previous row
+            dp[i] = dp[i - 1]
+    
+    # Return the result
+    return dp[n]%",55,False,-1,-1,-1,,,1
+split-message-based-on-limit,"
+from typing import List
+
+def splitMessage(message: str, limit: int) -> List[str]:
+    n = len(message)
+    parts = []
+    i = 0
+    while i < n:
+        part_len = min(limit, n - i)
+        part = message[i:i + part_len]
+        if i + part_len == n:
+            parts.append(part + f""<{len(parts) + 1}/{len(parts) + 1}>"")
+        else:
+            parts.append(part + f""<{len(parts) + 1}/{n}>"")
+        i += part_len
+    return parts
+",55,False,0,94,N/A,"**Tests that the code passed:**
+
+No tests passed.
+
+
+**Tests that the code failed:**
+
+assert splitMessage(""this is really a very awesome message"", 9) == [""thi<1/14>"",""s i<2/14>"",""s r<3/14>"",""eal<4/14>"",""ly <5/14>"",""a v<6/14>"",""ery<7/14>"","" aw<8/14>"",""eso<9/14>"",""me<10/14>"","" m<11/14>"",""es<12/14>"",""sa<13/14>"",""ge<14/14>""] # ERROR: This unit test fails. Output was ['this is r<1/37>', 'eally a v<2/37>', 'ery aweso<3/37>', 'me messag<4/37>', 'e<5/5>'], but expected value was: [""thi<1/14>"",""s i<2/14>"",""s r<3/14>"",""eal<4/14>"",""ly <5/14>"",""a v<6/14>"",""ery<7/14>"","" aw<8/14>"",""eso<9/14>"",""me<10/14>"","" m<11/14>"",""es<12/14>"",""sa<13/14>"",""ge<14/14>""]
+assert splitMessage(""short message"", 15) == [""short mess<1/2>"",""age<2/2>""] # ERROR: This unit test fails. Output was ['short message<1/1>'], but expected value was: [""short mess<1/2>"",""age<2/2>""]","(False, False)",0
+split-message-based-on-limit,"from typing import List
+
+def splitMessage(message: str, limit: int) -> List[str]:
+    """"""
+    Splits a message into parts based on a given limit.
+
+    Args:
+        message (str): The input message to be split.
+        limit (int): The maximum length of each part.
+
+    Returns:
+        List[str]: A list of parts of the message.
+    """"""
+    if not message or limit <= 0:
+        return []
+
+    n = len(message)
+    parts = []
+    i = 0
+    while i < n:
+        part_len = min(limit, n - i)
+        part = message[i:i + part_len]
+        if i + part_len == n:
+            suffix = f""<{len(parts) + 1}/{n // limit + 1}""
+        else:
+            suffix = f""<{len(parts) + 1}/{(n - i - part_len) // limit + len(parts) + 1}""
+        parts.append(part + suffix)
+        i += part_len
+    return parts",55,False,0,94,N/A,,,1
+maximum-number-of-non-overlapping-palindrome-substrings,"def maxPalindromes(s: str, k: int) -> int:
+    def is_palindrome(substring: str) -> bool:
+        return substring == substring[::-1]
+
+    max_count = 0
+    for i in range(len(s)):
+        for j in range(i + k, len(s) + 1):
+            substring = s[i:j]
+            if is_palindrome(substring):
+                max_count = max(max_count, 1 + (j - i - k + 1) // k)
+    return max_count",55,False,6,56,N/A,"**Tests that the code passed:**
+
+assert maxPalindromes(""adbcda"", 2) == 0
+
+**Tests that the code failed:**
+
+assert maxPalindromes(""abaccdbbd"", 3) == 2 # ERROR: This unit test fails. Output was 1, but expected value was: 2","(False, True)",0
+maximum-number-of-non-overlapping-palindrome-substrings,"from typing import List
+
+def maxPalindromes(s: str, k: int) -> int:
+    def expand_around_center(s: str, left: int, right: int) -> int:
+        while left >= 0 and right < len(s) and s[left] == s[right]:
+            left -= 1
+            right += 1
+        return right - left - 1
+
+    max_count = 0
+    palindromes = set()
+    for i in range(len(s)):
+        for j in range(i + k - 1, len(s)):
+            length = j - i + 1
+            if length >= k:
+                palindrome = expand_around_center(s, i, i)
+                if palindrome >= k and palindrome not in palindromes:
+                    max_count += 1
+                    palindromes.add(palindrome)
+                for center in range(i + 1, j):
+                    palindrome = expand_around_center(s, center, center)
+                    if palindrome >= k and palindrome not in palindromes:
+                        max_count += 1
+                        palindromes.add(palindrome)
+                # Check for palindromes centered at the end of the substring
+                for center in range(j - k + 1, i, -1):
+                    palindrome = expand_around_center(s, center, center)
+                    if palindrome >= k and palindrome not in palindromes:
+                        max_count += 1
+                        palindromes.add(palindrome)
+    return max_count",55,False,4,56,N/A,,,1
+minimum-total-distance-traveled,"
+from typing import List
+
+def minimumTotalDistance(robot: List[int], factory: List[List[int]]) -> int:
+    """"""
+    There are some robots and factories on the X-axis. You are given an integer
+    array `robot` where `robot[i]` is the position of the `ith` robot. You are
+    also given a 2D integer array `factory` where `factory[j] = [positionj,
+    limitj]` indicates that `positionj` is the position of the `jth` factory and
+    that the `jth` factory can repair at most `limitj` robots.
+    
+    The positions of each robot are unique. The positions of each factory are also
+    unique. Note that a robot can be in the same position as a factory initially.
+    
+    All the robots are initially broken; they keep moving in one direction. The
+    direction could be the negative or the positive direction of the X-axis. When
+    a robot reaches a factory that did not reach its limit, the factory repairs
+    the robot, and it stops moving.
+    
+    At any moment, you can set the initial direction of moving for some robot.
+    Your target is to minimize the total distance traveled by all the robots.
+    
+    Return the minimum total distance traveled by all the robots. The test cases
+    are generated such that all the robots can be repaired.
+    
+    Note that
+    
+    * All robots move at the same speed.
+    * If two robots move in the same direction, they will never collide.
+    * If two robots move in opposite directions and they meet at some point, they do not collide. They cross each other.
+    * If a robot passes by a factory that reached its limits, it crosses it as if it does not exist.
+    * If the robot moved from a position `x` to a position `y`, the distance it moved is `|y - x|`.
+    
+    Example 1:
+    
+    Input: robot = [0,4,6], factory = [[2,2],[6,2]]
+    Output: 4
+    Explanation: As shown in the figure:
+    - The first robot at position 0 moves in the positive direction. It will be repaired at the first factory.
+    - The second robot at position 4 moves in the negative direction. It will be repaired at the first factory.
+    - The third robot at position 6 will be repaired at the second factory. It does not need to move.
+    The limit of the first factory is 2, and it fixed 2 robots.
+    The limit of the second factory is 2, and it fixed 1 robot.
+    The total distance is |2 - 0| + |2 - 4| + |6 - 6| = 4. It can be shown that we cannot achieve a better total distance than 4.
+    
+    Example 2:
+    
+    Input: robot = [1,-1], factory = [[-2,1],[2,1]]
+    Output: 2
+    Explanation: As shown in the figure:
+    - The first robot at position 1 moves in the positive direction. It will be repaired at the second factory.
+    - The second robot at position -1 moves in the negative direction. It will be repaired at the first factory.
+    The limit of the first factory is 1, and it fixed 1 robot.
+    The limit of the second factory is 1, and it fixed 1 robot.
+    The total distance is |2 - 1| + |(-2) - (-1)| = 2. It can be shown that we cannot achieve a better total distance than 2.
+    
+    Constraints:
+    
+    * `1 <= robot.length, factory.length <= 100`
+    * `factory[j].length == 2`
+    * `-109 <= robot[i], positionj <= 109`
+    * `0 <= limitj <= robot.length`
+    * The input will be generated such that it is always possible to repair every robot.
+    """"""
+    robot.sort()
+    factory.sort(key=lambda x: x[0])
+    total_distance = 0
+    i, j = 0, 0
+    while i < len(robot) and j < len(factory):
+        if robot[i] <= factory[j][0]:
+            total_distance += abs(robot[i])
+            factory[j][1] -= 1
+            if factory[j][1] == 0:
+                j += 1
+            i += 1
+        else:
+            total_distance += abs(robot[i] - factory[j][0])
+            i += 1
+    return total_distance
+",55,False,3,40,N/A,"**Tests that the code passed:**
+
+No tests passed.
+
+
+**Tests that the code failed:**
+
+assert minimumTotalDistance([0,4,6], [[2,2],[6,2]]) == 4 # ERROR: This unit test fails. Output was 6, but expected value was: 4
+assert minimumTotalDistance([1,-1], [[-2,1],[2,1]]) == 2 # ERROR: This unit test fails. Output was 4, but expected value was: 2","(False, False)",0
+minimum-total-distance-traveled,"from typing import List
+
+def minimumTotalDistance(robot: List[int], factory: List[List[int]]) -> int:
+    """"""
+    This function calculates the minimum total distance traveled by all the robots.
+    
+    Args:
+    robot (List[int]): A list of integers representing the positions of the robots.
+    factory (List[List[int]]): A list of lists, where each sublist contains the position and limit of a factory.
+    
+    Returns:
+    int: The minimum total distance traveled by all the robots.
+    """"""
+    total_distance = 0
+    i, j = 0, 0
+    
+    # Process the robots and factories in the order they are given
+    while i < len(robot) and j < len(factory):
+        # Check if the current robot can be repaired at the current factory
+        if robot[i] == factory[j][0]:
+            # Check if the factory has reached its limit
+            if factory[j][1] > 0:
+                # Subtract the distance traveled by the robot from the total distance
+                total_distance -= abs(robot[i])
+                # Decrement the factory's limit
+                factory[j][1] -= 1
+                # Move to the next robot
+                i += 1
+            else:
+                # Move to the next factory
+                j += 1
+        elif robot[i] < factory[j][0]:
+            # Check if the robot is between two factories
+            if j > 0 and robot[i] > factory[j-1][0]:
+                # Add the distance traveled by the robot to the total distance
+                total_distance += abs(robot[i] - factory[j][0])
+                # Move to the next robot
+                i += 1
+            elif j < len(factory) - 1 and robot[i] < factory[j+1][0]:
+                # Add the distance traveled by the robot to the total distance
+                total_distance += abs(robot[i] - factory[j][0])
+                # Move to the next robot
+                i += 1
+            else:
+                # Add the distance traveled by the robot to the total distance
+                total_distance += abs(robot[i] - factory[j][0])
+                # Move to the next robot
+                i += 1
+        else:
+            # Check if the robot is between two factories
+            if j > 0 and robot[i] < factory[j-1][0]:
+                # Add the distance traveled by the robot to the total distance
+                total_distance += abs(robot[i] - factory[j][0])
+                # Move to the next robot
+                i += 1
+            elif j < len(factory) - 1 and robot[i] > factory[j+1][0]:
+                # Add the distance traveled by the robot to the total distance
+                total_distance += abs(robot[i] - factory[j][0])
+                # Move to the next robot
+                i += 1
+            else:
+                # Move to the next factory
+                j += 1
+    
+    # Check if all robots have been repaired
+    if i == len(robot):
+        return total_distance
+    else:
+        # Add the distance traveled by the remaining robots to the total distance
+        for k in range(i, len(robot)):
+            total_distance += abs(robot[k] - factory[j][0])
+        return total_distance",55,False,-1,-1,-1,,,1
+next-greater-element-iv,"
+from typing import List
+
+def secondGreaterElement(nums: List[int]) -> List[int]:
+    """"""
+    You are given a 0-indexed array of non-negative integers `nums`. For each
+    integer in `nums`, you must find its respective second greater integer.
+    
+    The second greater integer of `nums[i]` is `nums[j]` such that:
+    
+    * `j > i`
+    * `nums[j] > nums[i]`
+    * There exists exactly one index `k` such that `nums[k] > nums[i]` and `i < k < j`.
+    
+    If there is no such `nums[j]`, the second greater integer is considered to be
+    `-1`.
+    
+    * For example, in the array `[1, 2, 4, 3]`, the second greater integer of `1` is `4`, `2` is `3`, and that of `3` and `4` is `-1`.
+    
+    Return an integer array `answer`, where `answer[i]` is the second greater
+    integer of `nums[i]`.
+    
+    Example 1:
+    
+    Input: nums = [2,4,0,9,6]
+    Output: [9,6,6,-1,-1]
+    Explanation:
+    0th index: 4 is the first integer greater than 2, and 9 is the second integer greater than 2, to the right of 2.
+    1st index: 9 is the first, and 6 is the second integer greater than 4, to the right of 4.
+    2nd index: 9 is the first, and 6 is the second integer greater than 0, to the right of 0.
+    3rd index: There is no integer greater than 9 to its right, so the second greater integer is considered to be -1.
+    4th index: There is no integer greater than 6 to its right, so the second greater integer is considered to be -1.
+    Thus, we return [9,6,6,-1,-1].
+    
+    Example 2:
+    
+    Input: nums = [3,3]
+    Output: [-1,-1]
+    Explanation:
+    We return [-1,-1] since neither integer has any integer greater than it.
+    
+    Constraints:
+    
+    * `1 <= nums.length <= 10^5`
+    * `0 <= nums[i] <= 10^9`
+    """"""
+    n = len(nums)
+    answer = [-1] * n
+    stack = []
+    
+    for i in range(n):
+        while stack and nums[stack[-1]] < nums[i]:
+            last_greater = stack.pop()
+            if len(stack) == 0 or nums[stack[-1]] < nums[last_greater]:
+                answer[last_greater] = nums[i]
+        stack.append(i)
+    
+    return answer
+",55,False,-1,-1,-1,"**Tests that the code passed:**
+
+assert secondGreaterElement([3,3]) == [-1,-1]
+
+**Tests that the code failed:**
+
+assert secondGreaterElement([2,4,0,9,6]) == [9,6,6,-1,-1] # ERROR: This unit test fails. Output was [4, 9, -1, -1, -1], but expected value was: [9,6,6,-1,-1]","(False, True)",0
+next-greater-element-iv,"from typing import List
+
+def secondGreaterElement(nums: List[int]) -> List[int]:
+    """"""
+    You are given a 0-indexed array of non-negative integers `nums`. For each
+    integer in `nums`, you must find its respective second greater integer.
+    
+    The second greater integer of `nums[i]` is `nums[j]` such that:
+    
+    * `j > i`
+    * `nums[j] > nums[i]`
+    * There exists exactly one index `k` such that `nums[k] > nums[i]` and `i < k < j`.
+    
+    If there is no such `nums[j]`, the second greater integer is considered to be
+    `-1`.
+    
+    * For example, in the array `[1, 2, 4, 3]`, the second greater integer of `1` is `4`, `2` is `3`, and that of `3` and `4` is `-1`.
+    
+    Return an integer array `answer`, where `answer[i]` is the second greater
+    integer of `nums[i]`.
+    
+    Example 1:
+    
+    Input: nums = [2,4,0,9,6]
+    Output: [9,6,6,-1,-1]
+    Explanation:
+    0th index: 4 is the first integer greater than 2, and 9 is the second integer greater than 2, to the right of 2.
+    1st index: 9 is the first, and 6 is the second integer greater than 4, to the right of 4.
+    2nd index: 9 is the first, and 6 is the second integer greater than 0, to the right of 0.
+    3rd index: There is no integer greater than 9 to its right, so the second greater integer is considered to be -1.
+    4th index: There is no integer greater than 6 to its right, so the second greater integer is considered to be -1.
+    Thus, we return [9,6,6,-1,-1].
+    
+    Example 2:
+    
+    Input: nums = [3,3]
+    Output: [-1,-1]
+    Explanation:
+    We return [-1,-1] since neither integer has any integer greater than it.
+    
+    Constraints:
+    
+    * `1 <= nums.length <= 10^5`
+    * `0 <= nums[i] <= 10^9`
+    """"""
+    n = len(nums)
+    answer = [-1] * n
+    greater_than = {}
+    
+    for i in range(n):
+        greater_than[nums[i]] = []
+    
+    for i in range(n):
+        for j in range(i + 1, n):
+            if nums[j] > nums[i]:
+                greater_than[nums[i]].append((j, nums[j]))
+    
+    for i in range(n):
+        if len(greater_than[nums[i]]) > 1:
+            greater_than[nums[i]].sort(key=lambda x: x[0])
+            second_greater = greater_than[nums[i]][1][1]
+        elif len(greater_than[nums[i]]) == 1:
+            second_greater = greater_than[nums[i]][0][1]
+        else:
+            second_greater = -1
+        
+        answer[i] = second_greater
+    
+    return answer",55,False,5,51,N/A,"**Tests that the code passed:**
+
+assert secondGreaterElement([2,4,0,9,6]) == [9,6,6,-1,-1]
+assert secondGreaterElement([3,3]) == [-1,-1]
+
+**Tests that the code failed:**
+
+No tests failed.
+","(True, True)",1
+minimum-number-of-operations-to-make-arrays-similar,"
+from collections import Counter
+from typing import List
+
+def makeSimilar(nums: List[int], target: List[int]) -> int:
+    """"""
+    You are given two positive integer arrays `nums` and `target`, of the same
+    length.
+    
+    In one operation, you can choose any two distinct indices `i` and `j` where `0
+    <= i, j < nums.length` and:
+    
+    * set `nums[i] = nums[i] + 2` and
+    * set `nums[j] = nums[j] - 2`.
+    
+    Two arrays are considered to be similar if the frequency of each element is
+    the same.
+    
+    Return the minimum number of operations required to make `nums` similar to
+    `target`. The test cases are generated such that `nums` can always be similar
+    to `target`.
+    
+    Example 1:
+    
+    Input: nums = [8,12,6], target = [2,14,10]
+    Output: 2
+    Explanation: It is possible to make nums similar to target in two operations:
+    - Choose i = 0 and j = 2, nums = [10,12,4].
+    - Choose i = 1 and j = 2, nums = [10,14,2].
+    It can be shown that 2 is the minimum number of operations needed.
+    
+    Example 2:
+    
+    Input: nums = [1,2,5], target = [4,1,3]
+    Output: 1
+    Explanation: We can make nums similar to target in one operation:
+    - Choose i = 1 and j = 2, nums = [1,4,3].
+    
+    Example 3:
+    
+    Input: nums = [1,1,1,1,1], target = [1,1,1,1,1]
+    Output: 0
+    Explanation: The array nums is already similiar to target.
+    
+    Constraints:
+    
+    * `n == nums.length == target.length`
+    * `1 <= n <= 10^5`
+    * `1 <= nums[i], target[i] <= 10^6`
+    * It is possible to make `nums` similar to `target`.
+    """"""
+    n = len(nums)
+    count1 = Counter(nums)
+    count2 = Counter(target)
+    operations = 0
+    for num in set(nums):
+        diff = count2[num] - count1[num]
+        if diff % 2 == 0:
+            continue
+        else:
+            operations += abs(diff) // 2
+            count2[num + 2] += abs(diff) // 2
+            count2[num] -= abs(diff) // 2
+    return operations
+",55,False,1,32,N/A,"**Tests that the code passed:**
+
+assert makeSimilar([1,1,1,1,1], [1,1,1,1,1]) == 0
+
+**Tests that the code failed:**
+
+assert makeSimilar([8,12,6], [2,14,10]) == 2 # ERROR: This unit test fails. Output was 0, but expected value was: 2
+assert makeSimilar([1,2,5], [4,1,3]) == 1 # ERROR: This unit test fails. Output was 0, but expected value was: 1","(False, False, True)",0
+minimum-number-of-operations-to-make-arrays-similar,"from collections import Counter
+from typing import List
+
+def makeSimilar(nums: List[int], target: List[int]) -> int:
+    """"""
+    Calculate the minimum number of operations required to make `nums` similar to `target`.
+
+    Args:
+        nums: A list of integers.
+        target: A list of integers.
+
+    Returns:
+        The minimum number of operations required to make `nums` similar to `target`.
+    """"""
+    if not nums or not target:
+        return 0
+
+    count1 = Counter(nums)
+    count2 = Counter(target)
+    operations = 0
+    for num in set(nums):
+        diff = count2[num] - count1[num]
+        if diff % 2 == 0:
+            operations += diff // 2
+        else:
+            # If the difference is odd, we need to perform one more operation to make it even
+            # This is because we can only increase a number by 2 and decrease a number by 2 in each operation
+            operations += (diff + 1) // 2
+    return operations",55,False,1,32,N/A,,,1
+minimum-cost-to-make-array-equal,"
+from typing import List
+
+def minCost(nums: List[int], cost: List[int]) -> int:
+    n = len(nums)
+    total_sum = sum(nums)
+    target = sum(nums) // n
+    dp = [[float('inf')] * (target + 1) for _ in range(n + 1)]
+    dp[0][0] = 0
+
+    for i in range(1, n + 1):
+        for j in range(target + 1):
+            if j >= nums[i - 1]:
+                dp[i][j] = min(dp[i - 1][j], dp[i - 1][j - nums[i - 1]] + cost[i - 1])
+            else:
+                dp[i][j] = dp[i - 1][j]
+
+    return dp[n][target] * n - total_sum
+",55,False,0,48,N/A,"**Tests that the code passed:**
+
+No tests passed.
+
+
+**Tests that the code failed:**
+
+assert minCost([1,3,5,2], [2,3,1,14]) == 8 # ERROR: This unit test fails. Output was 45, but expected value was: 8
+assert minCost([2,2,2,2,2], [4,2,8,1,3]) == 0 # ERROR: This unit test fails. Output was -5, but expected value was: 0","(False, False)",0
+minimum-cost-to-make-array-equal,"from typing import List
+
+def minCost(nums: List[int], cost: List[int]) -> int:
+    """"""
+    This function calculates the minimum cost to make all elements in the array `nums` equal.
+    
+    Args:
+    nums (List[int]): A list of positive integers.
+    cost (List[int]): A list of costs corresponding to each element in `nums`.
+    
+    Returns:
+    int: The minimum cost to make all elements in `nums` equal.
+    """"""
+    
+    # Check if the input arrays are empty
+    if not nums or not cost:
+        return 0
+    
+    # Check if the target sum is less than the minimum value in the `nums` array
+    if sum(nums) // len(nums) < min(nums):
+        return float('inf')
+    
+    n = len(nums)
+    total_sum = sum(nums)
+    target = total_sum // n
+    
+    # Initialize the DP table
+    dp = [[float('inf')] * (target + 1) for _ in range(n + 1)]
+    dp[0][0] = 0
+    
+    # Fill the DP table
+    for i in range(1, n + 1):
+        for j in range(target + 1):
+            if j >= nums[i - 1]:
+                # Calculate the minimum cost by considering both possibilities
+                dp[i][j] = min(dp[i - 1][j], dp[i - 1][j - nums[i - 1]] + cost[i - 1])
+            else:
+                # Simply copy the value from the previous row
+                dp[i][j] = dp[i - 1][j]
+    
+    # Return the minimum cost
+    return dp[n][target] if dp[n][target]!= float('inf') else float('inf')",55,False,0,48,N/A,,,1
+create-components-with-same-value,"from typing import List
+
+def componentValue(nums: List[int], edges: List[List[int]]) -> int:
+    """"""
+    There is an undirected tree with `n` nodes labeled from `0` to `n - 1`.
+    
+    You are given a 0-indexed integer array `nums` of length `n` where `nums[i]`
+    represents the value of the `ith` node. You are also given a 2D integer array
+    `edges` of length `n - 1` where `edges[i] = [ai, bi]` indicates that there is
+    an edge between nodes `ai` and `bi` in the tree.
+    
+    You are allowed to delete some edges, splitting the tree into multiple
+    connected components. Let the value of a component be the sum of all `nums[i]`
+    for which node `i` is in the component.
+    
+    Return the maximum number of edges you can delete, such that every connected
+    component in the tree has the same value.
+    
+    Example 1:
+    
+    Input: nums = [6,2,2,2,6], edges = [[0,1],[1,2],[1,3],[3,4]] 
+    Output: 2 
+    Explanation: The above figure shows how we can delete the edges [0,1] and [3,4]. The created components are nodes [0], [1,2,3] and [4]. The sum of the values in each component equals 6. It can be proven that no better deletion exists, so the answer is 2.
+    
+    Example 2:
+    
+    Input: nums = [2], edges = []
+    Output: 0
+    Explanation: There are no edges to be deleted.
+    
+    Constraints:
+    
+    * `1 <= n <= 2 * 104`
+    * `nums.length == n`
+    * `1 <= nums[i] <= 50`
+    * `edges.length == n - 1`
+    * `edges[i].length == 2`
+    * `0 <= edges[i][0], edges[i][1] <= n - 1`
+    * `edges` represents a valid tree.
+    """"""
+    n = len(nums)
+    graph = [[] for _ in range(n)]
+    for u, v in edges:
+        graph[u].append(v)
+        graph[v].append(u)
+    parent = [-1] * n
+    size = [1] * n
+    def dfs(u, p):
+        for v in graph[u]:
+            if v!= p:
+                parent[v] = u
+                size[v] = dfs(v, u)
+        return size[u]
+    dfs(0, -1)
+    total_sum = sum(nums)
+    target = total_sum // len(nums)
+    dp = [0] * (total_sum + 1)
+    dp[0] = 1
+    for i in range(n):
+        for v in graph[i]:
+            if parent[i]!= v:
+                s = size[v]
+                for j in range(total_sum, nums[i] - 1, -1):
+                    dp[j] |= dp[j - nums[i]] & dp[j - s]
+    return sum(dp[target:])",55,False,1,43,N/A,"**Tests that the code passed:**
+
+assert componentValue([2], []) == 0
+
+**Tests that the code failed:**
+
+assert componentValue([6,2,2,2,6], [[0,1],[1,2],[1,3],[3,4]]) == 2 # ERROR: This unit test fails. Output was 0, but expected value was: 2","(False, True)",0
+create-components-with-same-value,"from typing import List
+
+def componentValue(nums: List[int], edges: List[List[int]]) -> int:
+    """"""
+    There is an undirected tree with `n` nodes labeled from `0` to `n - 1`.
+    
+    You are given a 0-indexed integer array `nums` of length `n` where `nums[i]`
+    represents the value of the `ith` node. You are also given a 2D integer array
+    `edges` of length `n - 1` where `edges[i] = [ai, bi]` indicates that there is
+    an edge between nodes `ai` and `bi` in the tree.
+    
+    You are allowed to delete some edges, splitting the tree into multiple
+    connected components. Let the value of a component be the sum of all `nums[i]`
+    for which node `i` is in the component.
+    
+    Return the maximum number of edges you can delete, such that every connected
+    component in the tree has the same value.
+    
+    Example 1:
+    
+    Input: nums = [6,2,2,2,6], edges = [[0,1],[1,2],[1,3],[3,4]] 
+    Output: 2 
+    Explanation: The above figure shows how we can delete the edges [0,1] and [3,4]. The created components are nodes [0], [1,2,3] and [4]. The sum of the values in each component equals 6. It can be proven that no better deletion exists, so the answer is 2.
+    
+    Example 2:
+    
+    Input: nums = [2], edges = []
+    Output: 0
+    Explanation: There are no edges to be deleted.
+    
+    Constraints:
+    
+    * `1 <= n <= 2 * 10^4`
+    * `nums.length == n`
+    * `1 <= nums[i] <= 50`
+    * `edges.length == n - 1`
+    * `edges[i].length == 2`
+    * `0 <= edges[i][0], edges[i][1] <= n - 1`
+    * `edges` represents a valid tree.
+    """"""
+    n = len(nums)
+    graph = [[] for _ in range(n)]
+    for u, v in edges:
+        graph[u].append(v)
+        graph[v].append(u)
+    parent = [-1] * n
+    size = [1] * n
+    def dfs(u, p):
+        for v in graph[u]:
+            if v!= p:
+                parent[v] = u
+                size[v] = dfs(v, u)
+        return size[u]
+    dfs(0, -1)
+    total_sum = sum(nums)
+    if total_sum % len(nums)!= 0:
+        return -1
+    target = total_sum // len(nums)
+    dp = {(0, 0): 1}
+    for i in range(n):
+        for v in graph[i]:
+            if parent[i]!= v:
+                s = size[v]
+                for j in range(max(nums), 0, -1):
+                    if j - s >= 0 and j - s >= nums[i]:
+                        dp[(j, s)] |= dp.get((j - nums[i], s - 1), 0) and dp.get((j - s, s), 0)
+    return sum(1 for (j, _) in dp if j == target)",55,False,3,43,N/A,,,1
+count-subarrays-with-fixed-bounds,"from typing import List
+
+def countSubarrays(nums: List[int], minK: int, maxK: int) -> int:
+    n = len(nums)
+    count = 0
+    for i in range(n):
+        min_val = maxK
+        max_val = minK
+        for j in range(i, n):
+            if nums[j] < min_val:
+                min_val = nums[j]
+            if nums[j] > max_val:
+                max_val = nums[j]
+            if min_val == minK and max_val == maxK:
+                count += 1
+    return count",55,False,42,53,N/A,"**Tests that the code passed:**
+
+assert countSubarrays([1,3,5,2,7,5], 1, 5) == 2
+assert countSubarrays([1,1,1,1], 1, 1) == 10
+
+**Tests that the code failed:**
+
+No tests failed.
+","(True, True)",1
+count-subarrays-with-fixed-bounds,"from typing import List
+
+def countSubarrays(nums: List[int], minK: int, maxK: int) -> int:
+    n = len(nums)
+    count = 0
+    for i in range(n):
+        min_val = maxK
+        max_val = minK
+        for j in range(i, n):
+            if nums[j] < min_val:
+                min_val = nums[j]
+            if nums[j] > max_val:
+                max_val = nums[j]
+            if min_val == minK and max_val == maxK:
+                count += 1
+    return count",55,False,42,53,N/A,"**Tests that the code passed:**
+
+assert countSubarrays([1,3,5,2,7,5], 1, 5) == 2
+assert countSubarrays([1,1,1,1], 1, 1) == 10
+
+**Tests that the code failed:**
+
+No tests failed.
+","(True, True)",1
+longest-increasing-subsequence-ii,"
+from typing import List
+
+def lengthOfLIS(nums: List[int], k: int) -> int:
+    n = len(nums)
+    dp = [1] * n
+    for i in range(1, n):
+        for j in range(i):
+            if nums[i] - nums[j] <= k and dp[i] < dp[j] + 1:
+                dp[i] = dp[j] + 1
+    return max(dp)
+",55,False,22,84,N/A,"**Tests that the code passed:**
+
+assert lengthOfLIS([1,5], 1) == 1
+
+**Tests that the code failed:**
+
+assert lengthOfLIS([4,2,1,4,3,4,5,8,15], 3) == 5 # ERROR: This unit test fails. Output was 8, but expected value was: 5
+assert lengthOfLIS([7,4,5,1,8,12,4,7], 5) == 4 # ERROR: This unit test fails. Output was 7, but expected value was: 4","(False, False, True)",0
+longest-increasing-subsequence-ii,"from typing import List
+
+def lengthOfLIS(nums: List[int], k: int) -> int:
+    if not nums:
+        return 0
+    
+    n = len(nums)
+    dp = [1] * n
+    for i in range(n):
+        for j in range(i):
+            if nums[i] > nums[j] and nums[i] - nums[j] <= k:
+                dp[i] = max(dp[i], dp[j] + 1)
+    return max(dp)",55,False,71,84,N/A,,,1
+paths-in-matrix-whose-sum-is-divisible-by-k,"
+from typing import List
+
+def numberOfPaths(grid: List[List[int]], k: int) -> int:
+    m, n = len(grid), len(grid[0])
+    MOD = 10**9 + 7
+    dp = [[[0] * (k + 1) for _ in range(n)] for _ in range(m)]
+    dp[0][0][grid[0][0] % k] = 1
+
+    for i in range(m):
+        for j in range(n):
+            for r in range(k):
+                if i > 0:
+                    dp[i][j][r] += dp[i-1][j][r]
+                    dp[i][j][r] %= MOD
+                if j > 0:
+                    dp[i][j][r] += dp[i][j-1][r]
+                    dp[i][j][r] %= MOD
+                dp[i][j][(grid[i][j] % k + r) % k] += dp[i][j][r]
+                dp[i][j][(grid[i][j] % k + r) % k] %= MOD
+
+    return dp[m-1][n-1][0]
+",55,False,0,88,N/A,"**Tests that the code passed:**
+
+No tests passed.
+
+
+**Tests that the code failed:**
+
+assert numberOfPaths([[5,2,4],[3,0,5],[0,7,2]], 3) == 2 # ERROR: This unit test fails. Output was 86, but expected value was: 2
+assert numberOfPaths([[0,0]], 5) == 1 # ERROR: This unit test fails. Output was 4, but expected value was: 1
+assert numberOfPaths([[7,3,4,9],[2,3,6,2],[2,3,7,0]], 1) == 10 # ERROR: This unit test fails. Output was 640, but expected value was: 10","(False, False, False)",0
+paths-in-matrix-whose-sum-is-divisible-by-k,"from typing import List
+
+def numberOfPaths(grid: List[List[int]], k: int) -> int:
+    m, n = len(grid), len(grid[0])
+    MOD = 10**9 + 7
+    prefix_sum = [[0] * (k + 1) for _ in range(m + 1)]
+    dp = [0] * (k + 1)
+
+    if k == 1:
+        return sum(dp)
+
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            prefix_sum[i][j % k] = (prefix_sum[i-1][j % k] + grid[i-1][j-1]) % MOD
+            dp[j % k] = (dp[j % k] + prefix_sum[i][j % k] % k) % MOD
+
+    return dp[0]",55,False,11,88,N/A,,,1

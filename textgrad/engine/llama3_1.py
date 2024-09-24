@@ -18,7 +18,7 @@ You are a helpful assistant"""
 
     def __init__(
             self,
-            model_string: str = "meta-llama/Meta-Llama-3.1-8B-Instruct",
+            model_string: str = "/u/hjin3/.llama/checkpoints/Meta-Llama3.1-8B",
             system_prompt: str = DEFAULT_SYSTEM_PROMPT,
             batch_size: int = 1,
     ):

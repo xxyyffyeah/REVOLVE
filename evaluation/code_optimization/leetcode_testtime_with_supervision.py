@@ -1,22 +1,12 @@
-"""
-This codes runs a code generation pipeline for instance optimization.
-
-The dataset used is the LeetCodeHardEval dataset. Part of the LeetCodeHard-Gym dataset.
-
-Since we are evaluating using leetcode, the code has to run in two phases:
-
-In the first phase, we parallel process the generation of the code using OpenAI's APIs.
-In the second phase, we evaluate the code using the leetcode environment.
-
-We need to do this because we cannot parallelize the leeetcode evaluation as it makes API calls for which
-we have a rate limit.
-
-
-"""
+import sys
+import os
+import re
+sys.path.append("../../textgrad")
+sys.path.append("../../")
+sys.path.append("../../textgrad/optimizer")
 import copy
 from dotenv import load_dotenv
 import pandas as pd
-
 load_dotenv()
 import multiprocessing
 from tqdm import tqdm
@@ -24,26 +14,42 @@ import textgrad
 from textgrad.engine import get_engine
 from textgrad import Variable
 from textgrad.optimizer import TextualGradientDescent
+from optimizer_v2 import TextualGradientDescent as TextualGradientDescent_v2
 from textgrad.tasks import load_instance_task
 from prompts import CodeTestTimewithTests, SYSTEM_PROMPT_FOR_FIRST_CODE, CODE_INSTANCE_ROLE_DESCRIPTION
 from evaluators.lt_eval import LeetCodeEvaluator
 from evaluators.py_eval import PythonEvaluator
+import torch
+import argparse
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(device)
+os.environ['LEETCODE_SESSION'] = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJfYXV0aF91c2VyX2lkIjoiMTQ4NTMyMzQiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJhbGxhdXRoLmFjY291bnQuYXV0aF9iYWNrZW5kcy5BdXRoZW50aWNhdGlvbkJhY2tlbmQiLCJfYXV0aF91c2VyX2hhc2giOiIwNjcxNDg3YjY1ZTgzNjJkMjgyNTkyOWEzYmIxZDhmMTNlY2MzNGZkYjQ5OWY2YWI5NGNhMjBjNDExYzlhOWU4IiwiaWQiOjE0ODUzMjM0LCJlbWFpbCI6ImhhaWJvamluMDAxQGdtYWlsLmNvbSIsInVzZXJuYW1lIjoiSGFpYm9fSmluIiwidXNlcl9zbHVnIjoiSGFpYm9fSmluIiwiYXZhdGFyIjoiaHR0cHM6Ly9hc3NldHMubGVldGNvZGUuY29tL3VzZXJzL2RlZmF1bHRfYXZhdGFyLmpwZyIsInJlZnJlc2hlZF9hdCI6MTcyNjg4NzU0MywiaXAiOiIzOC42NS4yMjMuMTEzIiwiaWRlbnRpdHkiOiJlOGRiMWE5MTBlZTA4OGI0NjllY2ZkMmI2YTliOWRhNSIsImRldmljZV93aXRoX2lwIjpbImEyODVhNDQ1MzNlNTg5MjNkNzEzZmVmZTUzYjUxMTQ4IiwiMzguNjUuMjIzLjExMyJdLCJzZXNzaW9uX2lkIjo3MjU3NTk3NywiX3Nlc3Npb25fZXhwaXJ5IjoxMjA5NjAwfQ.tkI2QsdjlV3MqnqawJ4Ek_JmB7wJ7ebUNELGSee0lcQ'
+os.environ['LEETCODE_CSRF_TOKEN'] = "s3x2mv4JfokBwUrrMkbesPncqf9a3cSix5BNjfLJsJfKJqkRNBQzu3ONuD28Fi1L"
+
+def config():
+    parser = argparse.ArgumentParser(description="Code optimization.")
+    parser.add_argument("--engine", type=str, default="meta-llama/Meta-Llama-3.1-8B-Instruct", help="The API to use.")
+    parser.add_argument("--optimizer_version", type=str, default="v1", help="The optimizer to use.")
+    parser.add_argument("--size", type=int, default=39, help="The number of total questions")
+    return parser.parse_args()
+
+args = config()
 
 internal_evaluator = LeetCodeEvaluator()
 
+optimizer_version = args.optimizer_version
+
+def extract_model_size(engine_name):
+    match = re.search(r'(\d+B)', engine_name)
+    if match:
+        return match.group(1)
+    else:
+        return "Unknown"
+            
 def optimization_one_iteration(optimizer, instance_var, prompt, tests):
-    """
-    This is a single iteration of optimization
-    :param optimizer:
-    :param instance_var:
-    :param prompt:
-    :return:
-    """
     pt = PythonEvaluator()
     tests = tests.split("\n")
 
-    # Evaluate the code
-    # state is True/False for each test
     state, test_string = pt.evaluate(instance_var.value, tests)
 
     optimizer.zero_grad()
@@ -56,25 +62,17 @@ def optimization_one_iteration(optimizer, instance_var, prompt, tests):
 
     return state, test_string
 
-
 def generate_starting_solution(prompt):
-    """
-    This is the first attempt at solving the problem.
-    :param prompt:
-    :return:
-    """
+    print(prompt)
     llm_first_code = ENGINE_API.generate(prompt, system_prompt=SYSTEM_PROMPT_FOR_FIRST_CODE)
+    if "```python" in llm_first_code and "```" in llm_first_code.split("```python")[1]:
+        llm_first_code = llm_first_code.split("```python")[1].split("```")[0]
 
-    llm_first_code = llm_first_code.split("```python")[1].split("```")[0]
+    print(llm_first_code)
     return llm_first_code
 
-
-def evaluation_and_optimization_pipeline(task_id, prompt, index, tests, MAX_ITERS):
-    """
-    :param prompt:
-    :param index:
-    :return:
-    """
+def evaluation_and_optimization_pipeline(args):
+    task_id, prompt, index, tests, MAX_ITERS = args
     print("Start of optimization pipeline", index)
 
     generated_programs = []
@@ -91,26 +89,31 @@ def evaluation_and_optimization_pipeline(task_id, prompt, index, tests, MAX_ITER
     instance_var = Variable(gpt_4_first_code, requires_grad=True,
                             role_description=CODE_INSTANCE_ROLE_DESCRIPTION)
 
-    optimizer = TextualGradientDescent(engine=ENGINE_API,
+    if optimizer_version == "v1":
+        # print(instance_var)
+        optimizer = TextualGradientDescent(engine=ENGINE_API,
                                        parameters=[instance_var],
                                        constraints=["Do not add asserts to the code",
                                                     "Code must contain imports"])
+    elif optimizer_version == "v2":
+        optimizer = TextualGradientDescent_v2(engine=ENGINE_API,
+                                       parameters=[instance_var],
+                                       constraints=["Do not add asserts to the code",
+                                                    "Code must contain imports"])
+    else:
+        raise ValueError(f"Invalid optimizer version: {optimizer_version}")
 
     pt = PythonEvaluator()
-    # Evaluate the code
-    # state is True/False for each test
     state, test_string = pt.evaluate(gpt_4_first_code, tests.split("\n"))
 
     generated_programs[-1]["state"] = state
     generated_programs[-1]["test_string"] = test_string
-    # if all test passed we early stop
 
-    for iter in range(1 + MAX_ITERS):
+    for iter in range(1, MAX_ITERS + 1):
         state, test_string = optimization_one_iteration(optimizer, instance_var, prompt, tests)
         generated_programs[-1]["state"] = state
         generated_programs[-1]["test_string"] = test_string
-        # if all test passed we early stop
-        if ((iter != 0) and all(state)):
+        if all(state):
             break
 
         n_iter += 1
@@ -122,25 +125,20 @@ def evaluation_and_optimization_pipeline(task_id, prompt, index, tests, MAX_ITER
                                    "iteration": n_iter,
                                    })
 
-
     print("End of optimization pipeline", index)
-
-    # we get the first program (zero-shot) and the last program (after optimization, if it exists)
     return generated_programs
-
 
 def evaluate_or_except(program):
     try:
-        res = (internal_evaluator.check_if_in_cache_or_submit(program["task_id"], program["code"]))
+        res = internal_evaluator.check_if_in_cache_or_submit(program["task_id"], program["code"])
         return res[0], res[1], res[2], res[3]
     except Exception as e:
         print(e)
         return False, -1, -1, -1
 
-
 if __name__ == "__main__":
 
-    SEEDS = [55]#, 91, 17, 21]#, 34]
+    SEEDS = [55]
 
     collection = {
         "task_id": [],
@@ -155,14 +153,16 @@ if __name__ == "__main__":
         "iteration_idx": []
     }
 
-
     for seed in SEEDS:
         instance_task = "LeetCodeHardEval"
 
-        TEST_ENGINE = "gpt-4o"
-        ENGINE_API = get_engine(engine_name=TEST_ENGINE, seed=seed)
+        # TEST_ENGINE = "llama-3_1"
+        TEST_ENGINE = args.engine
+        ENGINE_API = get_engine(engine_name=TEST_ENGINE)
+
         MAX_PROGRAMS_TO_OPTIMIZE = 39
         MULTIPROC_POOLS = min([20, MAX_PROGRAMS_TO_OPTIMIZE, multiprocessing.cpu_count()])
+        MULTIPROC_POOLS = 2
         MAX_ITERS = 4
 
         textgrad.set_backward_engine(ENGINE_API, override=True)
@@ -172,14 +172,17 @@ if __name__ == "__main__":
         code_dataset_examples = [(task_id, prompt, index, tests, MAX_ITERS)
                                  for index, (task_id, prompt, tests)
                                  in enumerate(dataset)][:MAX_PROGRAMS_TO_OPTIMIZE]
-
-        with multiprocessing.Pool(MULTIPROC_POOLS) as pool:
-            programs_and_gradients = pool.starmap(evaluation_and_optimization_pipeline, code_dataset_examples)
+        programs_and_gradients = []
+        for example in code_dataset_examples:
+            result = evaluation_and_optimization_pipeline(example)
+            programs_and_gradients.append(result)
+            print(result)
+        # with multiprocessing.Pool(MULTIPROC_POOLS) as pool:
+        #     programs_and_gradients = pool.map(evaluation_and_optimization_pipeline, code_dataset_examples)
 
         all_programs = []
         zero_programs = []
 
-        ctr = 0
         for list_of_programs in tqdm(programs_and_gradients):
             list_of_programs = [list_of_programs[0], list_of_programs[-1]]
             for iter, program in enumerate(list_of_programs):
@@ -190,17 +193,12 @@ if __name__ == "__main__":
                 program["runtime"] = res[3]
                 program["iteration_idx"] = iter
                 all_programs.append(program)
-                if ((program['iteration_idx'] == 0)):
-                    ctr += 1
+                if program['iteration_idx'] == 0:
                     zero_programs.append(program)
 
         print("CounterZero", len(zero_programs))
-        ctr = 0
-        for program in all_programs:
-            if program["iteration_idx"] == 0:
-                ctr += 1
-        print("CounterAll", ctr)
-        
+        print("CounterAll", len([program for program in all_programs if program["iteration_idx"] == 0]))
+        print(all_programs)
         for program in all_programs:
             collection["task_id"].append(program["task_id"])
             collection["problem"].append(program["code"])
@@ -212,9 +210,10 @@ if __name__ == "__main__":
             collection["runtime"].append(program["runtime"])
             collection["local_tests"].append(program["test_string"])
             collection["local_test_state"].append(program["state"])
-            
+
 
         program_df = pd.DataFrame(collection)
 
-        program_df.to_csv(f"../results/code_optimization/textgrad/leetcode_supervised_{TEST_ENGINE}.csv", index=False)
+        program_df.to_csv(f"../results_haibo/leetcode_supervised_{extract_model_size(TEST_ENGINE)}_{optimizer_version}.csv", index=False)
+        print("Saved~!")
 

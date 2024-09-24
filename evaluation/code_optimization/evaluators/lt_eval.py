@@ -36,7 +36,7 @@ class LeetCodeEvaluator:
     :return:
     """
 
-    def __init__(self):
+    def __init__(self, test_engines="meta-llama/Meta-Llama-3.1-8B-Instruct"):
         configuration = leetcode.Configuration()
         leetcode_session = os.environ["LEETCODE_SESSION"]
         csrf_token = os.environ["LEETCODE_CSRF_TOKEN"]
@@ -49,7 +49,8 @@ class LeetCodeEvaluator:
         self.leet_code_cache = Cache("./cache_leetcode")
 
         self.api_instance = leetcode.DefaultApi(leetcode.ApiClient(configuration))
-
+        self.TEST_ENGINE = test_engines
+        self.ENGINE_API = get_engine(engine_name=self.TEST_ENGINE)
     def id_from_slug(self, slug: str) -> str:
         """
         Retrieves the id of the question with the given slug
@@ -80,16 +81,21 @@ class LeetCodeEvaluator:
         code = autopep8.fix_code(code)
 
         # Some programs are not well formatted for the leetcode API
-        TEST_ENGINE = "gpt-4o"
-        ENGINE_API = get_engine(engine_name=TEST_ENGINE)
+        # TEST_ENGINE = "gpt-4o"
+        # TEST_ENGINE = "llama-3_1"
+        # ENGINE_API = get_engine(engine_name=TEST_ENGINE)
         FIXING_CODE_PROMPT = """Remove the unnecessary parentheses from the code. DO NOT CHANGE THE CODE.
 Use a Python code block to write your response. For example:
 ```python
 print('Hello world!')
 ```
 """
-        code = ENGINE_API.generate(code, system_prompt=FIXING_CODE_PROMPT)
-        code = code.split("```python")[1].split("```")[0]
+        code = self.ENGINE_API.generate(code, system_prompt=FIXING_CODE_PROMPT)
+        # code = code.split("```python")[1].split("```")[0]
+
+        if "```python" in code and "```" in code.split("```python")[1]:
+            code = code.split("```python")[1].split("```")[0]
+
 
         sub = LeetCodeSubmission(code=code,
                                  lang=ProgrammingLanguage.PYTHON3,
