@@ -10,14 +10,17 @@ from statistics import multimode
 
 import textgrad as tg
 from textgrad.tasks import load_instance_task
+import os
 
+os.environ["OPENAI_API_KEY"] = "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"
 
 def config():
     parser = argparse.ArgumentParser(description="Optimize a prompt for a task.")
     parser.add_argument("--task", type=str, default="MMLU_machine_learning", help="The task to evaluate the model on.")
-    parser.add_argument("--engine", type=str, default="meta-llama/Meta-Llama-3.1-8B-Instruct", help="The API to use.")
+    parser.add_argument("--engine", type=str, default="gpt-4o", help="The API to use for evaluation.")
     parser.add_argument("--max_iterations", type=int, default=3, help="The maximum number of iterations of test-time updates.")
-    parser.add_argument("--num_threads", type=int, default=16, help="The number of threads to use for evaluation.")
+    parser.add_argument("--num_threads", type=int, default=8, help="The number of threads to use for evaluation.")
+    parser.add_argument("--optimizer_version", type=str, default="v1", help="The optimizer version to use (v1 or v2).")
     return parser.parse_args()
 
 
@@ -32,14 +35,13 @@ class MajorityVoting:
             match = re.search(ANSWER_PATTERN_MULTICHOICE, pred.value)
             extracted_answer = match.group(1) if match else None
             pred_labels.append(extracted_answer)
-        
+
         modes = multimode(pred_labels)
         return tg.Variable(f"Answer: {modes[0]}", role_description="Majority ensemble")
 
 
 def get_zeroshot_answer(question):
     """Getting the zero-shot answer from an LLM without optimizing the response at test time."""
-    # The system prompt is from: https://github.com/openai/simple-evals/blob/main/sampler/chat_completion_sampler.py
     STARTING_SYSTEM_PROMPT = (
     "You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture."
     + "\nKnowledge cutoff: 2023-12\nCurrent date: 2024-04-01"
@@ -53,17 +55,23 @@ def run_test_time_training(sample):
     performance_history = []
     question, answer, test_time_objective, instance_eval_fn = sample
     zero_shot_response = get_zeroshot_answer(question)
-    
+
     instance_var = tg.Variable(zero_shot_response.value,
                                requires_grad=True,
                                role_description="creative and precise solution and the prediction for the multiple choice question")
-    
+
     # Evaluate the zero-shot response
     performance_history.append(int(instance_eval_fn(instance_var)))
-    
-    optimizer = tg.TextualGradientDescent(engine=llm_engine, 
-                                          parameters=[instance_var], 
-                                          constraints=["The last line of your response should be of the following format: 'Answer: $LETTER' (without quotes) where LETTER is one of ABCD."])
+
+    # Initialize the optimizer based on the specified version
+    if args.optimizer_version == "v1":
+        optimizer = tg.TextualGradientDescent(engine=llm_engine, parameters=[instance_var], 
+                                              constraints=["The last line of your response should be of the following format: 'Answer: $LETTER' (without quotes) where LETTER is one of ABCD."])
+    elif args.optimizer_version == "v2":
+        optimizer = tg.TextualGradientDescent_v2(engine=llm_engine, parameters=[instance_var], 
+                                                 constraints=["The last line of your response should be of the following format: 'Answer: $LETTER' (without quotes) where LETTER is one of ABCD."])
+    else:
+        raise ValueError(f"Invalid optimizer version: {args.optimizer_version}")
 
     predictions = []
     predictions.append(tg.Variable(
@@ -110,5 +118,5 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=args.num_threads) as exec
         all_history.append(performance_history)
 
 print(np.array(all_history).mean(axis=0))
-with open(f"./{args.task}_predictions.json", "w") as f:
+with open(f"./{args.task}_{args.optimizer_version}_predictions.json", "w") as f:
     json.dump(all_solutions, f)
