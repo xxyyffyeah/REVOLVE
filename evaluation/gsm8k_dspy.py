@@ -8,6 +8,7 @@ import random
 import pandas as pd
 import json
 import os
+import torch
 from dotenv import load_dotenv
 load_dotenv(override=True)
 
@@ -21,7 +22,7 @@ def config():
 args = config()
 
 # Set up the LM.
-turbo = dspy.HFModel(model=args.model)
+turbo = dspy.HFModel(model=args.model, max_tokens=2000, top_p=0.99, temperature=1e-6, model_kwargs={'torch_dtype': torch.bfloat16})
 dspy.settings.configure(lm=turbo)
 
 # Load math questions from the GSM8K dataset.
@@ -38,10 +39,9 @@ class StudentCoT(dspy.Module):
     def __init__(self):
         super().__init__()
         self.prog = dspy.ChainOfThought("question -> answer")
-        self.lm = dspy.HFModel(model=args.model, max_tokens=2000, top_p=0.99, temperature=1e-6)
 
     def forward(self, question):
-        return self.prog(question=question, lm=self.lm)
+        return self.prog(question=question)
 
 
 class TeacherCoT(dspy.Module):
