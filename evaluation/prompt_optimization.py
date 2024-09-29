@@ -8,6 +8,7 @@ import textgrad as tg
 from textgrad.tasks import load_task
 import numpy as np
 import random
+import json
 
 
 def set_seed(seed):
@@ -18,7 +19,8 @@ def set_seed(seed):
 def config():
     parser = argparse.ArgumentParser(description="Optimize a prompt for a task.")
     parser.add_argument("--task", type=str, default="BBH_object_counting", help="The task to evaluate the model on.")
-    parser.add_argument("--engine", type=str, default="meta-llama/Meta-Llama-3.1-8B-Instruct", help="The API to use.")
+    parser.add_argument("--tg_engine", type=str, default="azure-gpt4o", help="The backbone engine for textgrad.")
+    parser.add_argument("--model", type=str, default="meta-llama/Meta-Llama-3.1-8B-Instruct", help="The model on which the prompt is optimized.")
     parser.add_argument("--optimizer_version", type=str, default="v1", help="The optimizer to use.")
     parser.add_argument("--batch_size", type=int, default=3, help="The batch size to use for training.")
     parser.add_argument("--max_epochs", type=int, default=1, help="The maximum number of epochs to train for.")
@@ -28,13 +30,10 @@ def config():
     return parser.parse_args()
 
 
-args = config()
-
-
 def eval_sample(item, eval_fn, model):
     x, y = item
     x = tg.Variable(x, requires_grad=False, role_description="query to the language model")
-    y = tg.Variable(y, requires_grad=False, role_description="correct answer for the query")
+    y = tg.Variable(str(y), requires_grad=False, role_description="correct answer for the query")
     response = model(x)
     try:
         eval_output_variable = eval_fn(inputs=dict(prediction=response, ground_truth_answer=y))
@@ -43,7 +42,7 @@ def eval_sample(item, eval_fn, model):
         eval_output_variable = eval_fn([x, y, response])
         eval_output_parsed = eval_fn.parse_output(eval_output_variable)
         return int(eval_output_parsed)
-    
+
 
 def eval_dataset(test_set, eval_fn, model, max_samples: int=None):
     if max_samples is None:
@@ -52,7 +51,7 @@ def eval_dataset(test_set, eval_fn, model, max_samples: int=None):
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.num_threads) as executor:
         futures = []
         for _, sample in enumerate(test_set):
-            
+
             future = executor.submit(eval_sample, sample, eval_fn, model)
             futures.append(future)
             if len(futures) >= max_samples:
@@ -62,7 +61,7 @@ def eval_dataset(test_set, eval_fn, model, max_samples: int=None):
             acc_item = future.result()
             accuracy_list.append(acc_item)
             tqdm_loader.set_description(f"Accuracy: {np.mean(accuracy_list)}")
-    return accuracy_list 
+    return accuracy_list
 
 
 def run_validation_revert(system_prompt: tg.Variable, results, model, eval_fn, val_set):
@@ -72,7 +71,7 @@ def run_validation_revert(system_prompt: tg.Variable, results, model, eval_fn, v
     print("Val acc: ", val_performance)
     print("Previous acc: ", previous_performance)
     previous_prompt = results["prompt"][-1]
-    
+
     if val_performance < previous_performance:
         print(f"Rejected prompt: {system_prompt.value}")
         system_prompt.set_value(previous_prompt)
@@ -86,7 +85,7 @@ def get_eval_output(x, y, model, eval_fn):
     Helper function to be used in the ThreadPoolExecutor to evaluate the model on a batch of data.
     """
     x = tg.Variable(x, requires_grad=False, role_description="query to the language model")
-    y = tg.Variable(y, requires_grad=False, role_description="correct answer for the query")
+    y = tg.Variable(str(y), requires_grad=False, role_description="correct answer for the query")
     response = model(x)
     try:
         eval_output_variable = eval_fn(inputs=dict(prediction=response, ground_truth_answer=y))
@@ -95,11 +94,13 @@ def get_eval_output(x, y, model, eval_fn):
     return eval_output_variable
 
 
+args = config()
+print(vars(args))
 set_seed(args.seed)
-if 'llama' in args.engine:
-    llm_api = tg.get_engine(engine_name=args.engine, batch_size=args.num_threads)
+if 'llama' in args.tg_engine:
+    llm_api = tg.get_engine(engine_name=args.tg_engine, batch_size=args.num_threads)
 else:
-    llm_api = tg.get_engine(engine_name=args.engine)
+    llm_api = tg.get_engine(engine_name=args.tg_engine)
 tg.set_backward_engine(llm_api, override=True)
 
 # Load the data and the evaluation function
@@ -110,13 +111,20 @@ STARTING_SYSTEM_PROMPT = train_set.get_task_description()
 train_loader = tg.tasks.DataLoader(train_set, batch_size=args.batch_size, shuffle=True)
 print(f'Starting system prompt: {STARTING_SYSTEM_PROMPT}')
 
-system_prompt = tg.Variable(STARTING_SYSTEM_PROMPT, 
+system_prompt = tg.Variable(STARTING_SYSTEM_PROMPT,
                             requires_grad=True,
                             role_description="structured system prompt to a somewhat capable language model that specifies the behavior and strategies for the QA task")
-model = tg.BlackboxLLM(llm_api, system_prompt)
+
+if 'llama' in args.model:
+    model_api = tg.get_engine(engine_name=args.model, batch_size=args.num_threads)
+else:
+    model_api = tg.get_engine(engine_name=args.model)
+model = tg.BlackboxLLM(model_api, system_prompt)
 
 if args.optimizer_version == "v1":
     optimizer = tg.TextualGradientDescent(engine=llm_api, parameters=[system_prompt])
+elif args.optimizer_version == "v1_momentum":
+    optimizer = tg.TextualGradientDescentwithMomentum(engine=llm_api, parameters=[system_prompt], momentum_window=12)
 elif args.optimizer_version == "v2":
     optimizer = tg.TextualGradientDescent_v2(engine=llm_api, parameters=[system_prompt])
 else:
@@ -159,10 +167,7 @@ for epoch in range(args.max_epochs):
         if steps == 11:
             break
 
-
-# Also dump the final results
-import json
 os.makedirs("./results", exist_ok=True)
-model_name = args.engine.split("/")[-1]
+model_name = args.tg_engine.split("/")[-1]
 with open(f"./results/results_{args.task}_{model_name}_{args.optimizer_version}.json", "w") as f:
     json.dump(results, f)
