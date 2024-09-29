@@ -22,7 +22,7 @@ def config():
 args = config()
 
 # Set up the LM.
-turbo = dspy.HFModel(model=args.model, max_tokens=2000, top_p=0.99, temperature=1e-6, model_kwargs={'torch_dtype': torch.bfloat16})
+turbo = dspy.HFModel(model=args.model, max_tokens=2000, top_p=0.99, temperature=1e-6)
 dspy.settings.configure(lm=turbo)
 
 # Load math questions from the GSM8K dataset.
