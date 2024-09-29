@@ -263,6 +263,7 @@ class TextualGradientDescentwithMomentum(Optimizer):
                                       **optimizer_information)
 
         logger.info(f"TextualGradientwithMomentum prompt for update", extra={"prompt": prompt})
+        return prompt
 
     def _update_momentum_storage(self, variable: Variable, momentum_storage_idx: int):
         if len(self.momentum_storage[momentum_storage_idx]) >= self.momentum_window:
