@@ -8,6 +8,7 @@ import textgrad as tg
 from textgrad.tasks import load_task
 import numpy as np
 import random
+import json
 
 
 def set_seed(seed):
@@ -18,7 +19,8 @@ def set_seed(seed):
 def config():
     parser = argparse.ArgumentParser(description="Optimize a prompt for a task.")
     parser.add_argument("--task", type=str, default="BBH_object_counting", help="The task to evaluate the model on.")
-    parser.add_argument("--engine", type=str, default="meta-llama/Meta-Llama-3.1-8B-Instruct", help="The API to use.")
+    parser.add_argument("--tg_engine", type=str, default="azure-gpt4o", help="The backbone engine for textgrad.")
+    parser.add_argument("--model", type=str, default="meta-llama/Meta-Llama-3.1-8B-Instruct", help="The model on which the prompt is optimized.")
     parser.add_argument("--optimizer_version", type=str, default="v1", help="The optimizer to use.")
     parser.add_argument("--batch_size", type=int, default=3, help="The batch size to use for training.")
     parser.add_argument("--max_epochs", type=int, default=1, help="The maximum number of epochs to train for.")
@@ -26,10 +28,6 @@ def config():
     parser.add_argument("--run_validation", action="store_true", help="Whether to run validation or not.")
     parser.add_argument("--num_threads", type=int, default=3, help="The number of threads to use for evaluation.")
     return parser.parse_args()
-
-
-args = config()
-print(vars(args))
 
 
 def eval_sample(item, eval_fn, model):
@@ -96,11 +94,13 @@ def get_eval_output(x, y, model, eval_fn):
     return eval_output_variable
 
 
+args = config()
+print(vars(args))
 set_seed(args.seed)
-if 'llama' in args.engine:
-    llm_api = tg.get_engine(engine_name=args.engine, batch_size=args.num_threads)
+if 'llama' in args.tg_engine:
+    llm_api = tg.get_engine(engine_name=args.tg_engine, batch_size=args.num_threads)
 else:
-    llm_api = tg.get_engine(engine_name=args.engine)
+    llm_api = tg.get_engine(engine_name=args.tg_engine)
 tg.set_backward_engine(llm_api, override=True)
 
 # Load the data and the evaluation function
@@ -115,7 +115,7 @@ system_prompt = tg.Variable(STARTING_SYSTEM_PROMPT,
                             requires_grad=True,
                             role_description="structured system prompt to a somewhat capable language model that specifies the behavior and strategies for the QA task")
 
-model_api = tg.get_engine(engine_name="meta-llama/Meta-Llama-3.1-8B-Instruct", batch_size=args.num_threads)
+model_api = tg.get_engine(engine_name=args.model, batch_size=args.num_threads)
 model = tg.BlackboxLLM(model_api, system_prompt)
 
 if args.optimizer_version == "v1":
@@ -164,10 +164,7 @@ for epoch in range(args.max_epochs):
         if steps == 11:
             break
 
-
-# Also dump the final results
-import json
 os.makedirs("./results", exist_ok=True)
-model_name = args.engine.split("/")[-1]
+model_name = args.tg_engine.split("/")[-1]
 with open(f"./results/results_{args.task}_{model_name}_{args.optimizer_version}.json", "w") as f:
     json.dump(results, f)
