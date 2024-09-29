@@ -115,7 +115,10 @@ system_prompt = tg.Variable(STARTING_SYSTEM_PROMPT,
                             requires_grad=True,
                             role_description="structured system prompt to a somewhat capable language model that specifies the behavior and strategies for the QA task")
 
-model_api = tg.get_engine(engine_name=args.model, batch_size=args.num_threads)
+if 'llama' in args.model:
+    model_api = tg.get_engine(engine_name=args.model, batch_size=args.num_threads)
+else:
+    model_api = tg.get_engine(engine_name=args.model)
 model = tg.BlackboxLLM(model_api, system_prompt)
 
 if args.optimizer_version == "v1":
