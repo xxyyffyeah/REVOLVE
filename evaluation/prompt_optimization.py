@@ -29,6 +29,7 @@ def config():
 
 
 args = config()
+print(vars(args))
 
 
 def eval_sample(item, eval_fn, model):
@@ -43,7 +44,7 @@ def eval_sample(item, eval_fn, model):
         eval_output_variable = eval_fn([x, y, response])
         eval_output_parsed = eval_fn.parse_output(eval_output_variable)
         return int(eval_output_parsed)
-    
+
 
 def eval_dataset(test_set, eval_fn, model, max_samples: int=None):
     if max_samples is None:
@@ -52,7 +53,7 @@ def eval_dataset(test_set, eval_fn, model, max_samples: int=None):
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.num_threads) as executor:
         futures = []
         for _, sample in enumerate(test_set):
-            
+
             future = executor.submit(eval_sample, sample, eval_fn, model)
             futures.append(future)
             if len(futures) >= max_samples:
@@ -62,7 +63,7 @@ def eval_dataset(test_set, eval_fn, model, max_samples: int=None):
             acc_item = future.result()
             accuracy_list.append(acc_item)
             tqdm_loader.set_description(f"Accuracy: {np.mean(accuracy_list)}")
-    return accuracy_list 
+    return accuracy_list
 
 
 def run_validation_revert(system_prompt: tg.Variable, results, model, eval_fn, val_set):
@@ -72,7 +73,7 @@ def run_validation_revert(system_prompt: tg.Variable, results, model, eval_fn, v
     print("Val acc: ", val_performance)
     print("Previous acc: ", previous_performance)
     previous_prompt = results["prompt"][-1]
-    
+
     if val_performance < previous_performance:
         print(f"Rejected prompt: {system_prompt.value}")
         system_prompt.set_value(previous_prompt)
@@ -110,13 +111,17 @@ STARTING_SYSTEM_PROMPT = train_set.get_task_description()
 train_loader = tg.tasks.DataLoader(train_set, batch_size=args.batch_size, shuffle=True)
 print(f'Starting system prompt: {STARTING_SYSTEM_PROMPT}')
 
-system_prompt = tg.Variable(STARTING_SYSTEM_PROMPT, 
+system_prompt = tg.Variable(STARTING_SYSTEM_PROMPT,
                             requires_grad=True,
                             role_description="structured system prompt to a somewhat capable language model that specifies the behavior and strategies for the QA task")
-model = tg.BlackboxLLM(llm_api, system_prompt)
+
+model_api = tg.get_engine(engine_name="meta-llama/Meta-Llama-3.1-8B-Instruct", batch_size=args.num_threads)
+model = tg.BlackboxLLM(model_api, system_prompt)
 
 if args.optimizer_version == "v1":
     optimizer = tg.TextualGradientDescent(engine=llm_api, parameters=[system_prompt])
+elif args.optimizer_version == "v1_momentum":
+    optimizer = tg.TextualGradientDescentwithMomentum(engine=llm_api, parameters=[system_prompt], momentum_window=12)
 elif args.optimizer_version == "v2":
     optimizer = tg.TextualGradientDescent_v2(engine=llm_api, parameters=[system_prompt])
 else:
