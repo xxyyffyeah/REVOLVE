@@ -33,7 +33,7 @@ def config():
 def eval_sample(item, eval_fn, model):
     x, y = item
     x = tg.Variable(x, requires_grad=False, role_description="query to the language model")
-    y = tg.Variable(y, requires_grad=False, role_description="correct answer for the query")
+    y = tg.Variable(str(y), requires_grad=False, role_description="correct answer for the query")
     response = model(x)
     try:
         eval_output_variable = eval_fn(inputs=dict(prediction=response, ground_truth_answer=y))
@@ -85,7 +85,7 @@ def get_eval_output(x, y, model, eval_fn):
     Helper function to be used in the ThreadPoolExecutor to evaluate the model on a batch of data.
     """
     x = tg.Variable(x, requires_grad=False, role_description="query to the language model")
-    y = tg.Variable(y, requires_grad=False, role_description="correct answer for the query")
+    y = tg.Variable(str(y), requires_grad=False, role_description="correct answer for the query")
     response = model(x)
     try:
         eval_output_variable = eval_fn(inputs=dict(prediction=response, ground_truth_answer=y))
