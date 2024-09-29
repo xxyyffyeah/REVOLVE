@@ -7,6 +7,9 @@ import numpy as np
 import random
 import pandas as pd
 import json
+import os
+from dotenv import load_dotenv
+load_dotenv(override=True)
 
 
 def config():
@@ -45,7 +48,11 @@ class TeacherCoT(dspy.Module):
     def __init__(self):
         super().__init__()
         self.prog = dspy.ChainOfThought("question -> answer")
-        self.lm = dspy.AzureOpenAI(model='gpt4o', max_tokens=2000, top_p=0.99)
+        self.lm = dspy.AzureOpenAI(model='gpt4o', max_tokens=2000, top_p=0.99,
+                                   api_base=os.getenv('AZURE_OPENAI_API_BASE'),
+                                   api_version=os.getenv('AZURE_OPENAI_API_VERSION'),
+                                   api_key=os.getenv('AZURE_OPENAI_API_KEY')
+                                   )
 
     def forward(self, question):
         return self.prog(question=question, lm=self.lm)
