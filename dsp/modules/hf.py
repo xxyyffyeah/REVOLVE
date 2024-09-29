@@ -41,6 +41,7 @@ class HFModel(LM):
         ] = "auto",
         token: Optional[str] = None,
         model_kwargs: Optional[dict] = {},
+        **kwargs
     ):
         """wrapper for Hugging Face models
 
@@ -57,6 +58,7 @@ class HFModel(LM):
         self.provider = "hf"
         self.is_client = is_client
         self.device_map = hf_device_map
+        self.kwargs.update(kwargs)
 
         hf_autoconfig_kwargs = dict(token=token or os.environ.get("HF_TOKEN"))
         hf_autotokenizer_kwargs = hf_autoconfig_kwargs.copy()
