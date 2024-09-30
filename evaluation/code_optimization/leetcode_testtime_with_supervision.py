@@ -1,10 +1,4 @@
-import sys
-import os
 import re
-sys.path.append("../../textgrad")
-sys.path.append("../../")
-sys.path.append("../../textgrad/optimizer")
-import copy
 from dotenv import load_dotenv
 import pandas as pd
 load_dotenv()
@@ -12,9 +6,7 @@ import multiprocessing
 from tqdm import tqdm
 import textgrad
 from textgrad.engine import get_engine
-from textgrad import Variable
-from textgrad.optimizer import TextualGradientDescent
-from optimizer_v2 import TextualGradientDescent as TextualGradientDescent_v2
+from textgrad import Variable, TextualGradientDescent_v2, TextualGradientDescent
 from textgrad.tasks import load_instance_task
 from prompts import CodeTestTimewithTests, SYSTEM_PROMPT_FOR_FIRST_CODE, CODE_INSTANCE_ROLE_DESCRIPTION
 from evaluators.lt_eval import LeetCodeEvaluator
@@ -23,8 +15,6 @@ import torch
 import argparse
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(device)
-os.environ['LEETCODE_SESSION'] = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJfYXV0aF91c2VyX2lkIjoiMTQ4NTMyMzQiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJhbGxhdXRoLmFjY291bnQuYXV0aF9iYWNrZW5kcy5BdXRoZW50aWNhdGlvbkJhY2tlbmQiLCJfYXV0aF91c2VyX2hhc2giOiIwNjcxNDg3YjY1ZTgzNjJkMjgyNTkyOWEzYmIxZDhmMTNlY2MzNGZkYjQ5OWY2YWI5NGNhMjBjNDExYzlhOWU4IiwiaWQiOjE0ODUzMjM0LCJlbWFpbCI6ImhhaWJvamluMDAxQGdtYWlsLmNvbSIsInVzZXJuYW1lIjoiSGFpYm9fSmluIiwidXNlcl9zbHVnIjoiSGFpYm9fSmluIiwiYXZhdGFyIjoiaHR0cHM6Ly9hc3NldHMubGVldGNvZGUuY29tL3VzZXJzL2RlZmF1bHRfYXZhdGFyLmpwZyIsInJlZnJlc2hlZF9hdCI6MTcyNjg4NzU0MywiaXAiOiIzOC42NS4yMjMuMTEzIiwiaWRlbnRpdHkiOiJlOGRiMWE5MTBlZTA4OGI0NjllY2ZkMmI2YTliOWRhNSIsImRldmljZV93aXRoX2lwIjpbImEyODVhNDQ1MzNlNTg5MjNkNzEzZmVmZTUzYjUxMTQ4IiwiMzguNjUuMjIzLjExMyJdLCJzZXNzaW9uX2lkIjo3MjU3NTk3NywiX3Nlc3Npb25fZXhwaXJ5IjoxMjA5NjAwfQ.tkI2QsdjlV3MqnqawJ4Ek_JmB7wJ7ebUNELGSee0lcQ'
-os.environ['LEETCODE_CSRF_TOKEN'] = "s3x2mv4JfokBwUrrMkbesPncqf9a3cSix5BNjfLJsJfKJqkRNBQzu3ONuD28Fi1L"
 
 def config():
     parser = argparse.ArgumentParser(description="Code optimization.")
