@@ -1,7 +1,5 @@
 from dotenv import load_dotenv
-import sys
-sys.path.append('../../evaluation/code_optimization/evaluators')
-from utils import get_output_of_test, timeout_exec
+from .utils import get_output_of_test, timeout_exec
 
 class PythonEvaluator:
     """
