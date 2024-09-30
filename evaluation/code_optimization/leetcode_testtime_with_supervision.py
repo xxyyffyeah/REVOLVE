@@ -6,7 +6,7 @@ import multiprocessing
 from tqdm import tqdm
 import textgrad
 from textgrad.engine import get_engine
-from textgrad import Variable, TextualGradientDescent_v2, TextualGradientDescent
+from textgrad import Variable, TextualGradientDescent_v2, TextualGradientDescent, TextualGradientDescentwithMomentum
 from textgrad.tasks import load_instance_task
 from prompts import CodeTestTimewithTests, SYSTEM_PROMPT_FOR_FIRST_CODE, CODE_INSTANCE_ROLE_DESCRIPTION
 from evaluators.lt_eval import LeetCodeEvaluator
@@ -85,6 +85,12 @@ def evaluation_and_optimization_pipeline(args):
                                        parameters=[instance_var],
                                        constraints=["Do not add asserts to the code",
                                                     "Code must contain imports"])
+    elif optimizer_version == "v1_momentum":
+        optimizer = TextualGradientDescentwithMomentum(engine=ENGINE_API,
+                                       parameters=[instance_var],
+                                       constraints=["Do not add asserts to the code",
+                                                    "Code must contain imports"],
+                                       momentum_window=5)
     elif optimizer_version == "v2":
         optimizer = TextualGradientDescent_v2(engine=ENGINE_API,
                                        parameters=[instance_var],
