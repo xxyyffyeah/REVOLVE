@@ -1,3 +1,4 @@
+# REVOLVE: Optimizing AI Systems by Tracking Response Evolution in Textual Optimization for More Stable and Effective Progress
 <!--- BADGES: START --->
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/zou-group/TextGrad/blob/main/examples/notebooks/Prompt-Optimization.ipynb)
 [![GitHub license](https://img.shields.io/badge/License-MIT-blue.svg)][#license-gh-package]
@@ -13,8 +14,6 @@
 [#pypi-package]: https://pypi.org/project/textgrad/
 [#conda-forge-package]: https://anaconda.org/conda-forge/textgrad
 <!--- BADGES: END --->
-
-## REVOLVE: Optimizing AI Systems by Tracking Response Evolution in Textual Optimization for More Stable and Effective Progress
 
 ## About
 - This is the code for paper [REVOLVE: Optimizing AI Systems by Tracking Response Evolution in Textual Optimization for More Stable and Effective Progress](https://arxiv.org/pdf/123456.pdf).
