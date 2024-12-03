@@ -19,7 +19,7 @@ def set_seed(seed):
 def config():
     parser = argparse.ArgumentParser(description="Optimize a prompt for a task.")
     parser.add_argument("--task", type=str, default="BBH_object_counting", help="The task to evaluate the model on.")
-    parser.add_argument("--tg_engine", type=str, default="azure-gpt4o", help="The backbone engine for textgrad.")
+    parser.add_argument("--backbone_engine", type=str, default="azure-gpt4o", help="The backbone engine for textgrad.")
     parser.add_argument("--model", type=str, default="meta-llama/Meta-Llama-3.1-8B-Instruct", help="The model on which the prompt is optimized.")
     parser.add_argument("--optimizer_version", type=str, default="v1", help="The optimizer to use.")
     parser.add_argument("--batch_size", type=int, default=3, help="The batch size to use for training.")
@@ -97,10 +97,10 @@ def get_eval_output(x, y, model, eval_fn):
 args = config()
 print(vars(args))
 set_seed(args.seed)
-if 'llama' in args.tg_engine:
-    llm_api = tg.get_engine(engine_name=args.tg_engine, batch_size=args.num_threads)
+if 'llama' in args.backbone_engine:
+    llm_api = tg.get_engine(engine_name=args.backbone_engine, batch_size=args.num_threads)
 else:
-    llm_api = tg.get_engine(engine_name=args.tg_engine)
+    llm_api = tg.get_engine(engine_name=args.backbone_engine)
 tg.set_backward_engine(llm_api, override=True)
 
 # Load the data and the evaluation function
@@ -168,6 +168,6 @@ for epoch in range(args.max_epochs):
             break
 
 os.makedirs("./results", exist_ok=True)
-model_name = args.tg_engine.split("/")[-1]
+model_name = args.backbone_engine.split("/")[-1]
 with open(f"./results/results_{args.task}_{model_name}_{args.optimizer_version}.json", "w") as f:
     json.dump(results, f)
