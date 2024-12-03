@@ -25,7 +25,7 @@
 pip install REVOLVE
 ```
 
-![Analogy with Torch](assets/analogy.png)
+![Analogy with Torch](assets/method_comparison.png)
 
 ## Method Evaluation
 ### Evaluating Solution Optimization
