@@ -15,6 +15,8 @@
 [#conda-forge-package]: https://anaconda.org/conda-forge/textgrad
 <!--- BADGES: END --->
 
+![Analogy with Second-order Optimization](assets/method_comparison.png)
+
 ## About
 - This is the code for paper [REVOLVE: Optimizing AI Systems by Tracking Response Evolution in Textual Optimization for More Stable and Effective Progress](https://arxiv.org/pdf/123456.pdf).
 - REVOLVE is an optimization framework that enhances the stability and efficiency of AI system optimization by tracking the evolution of model responses across iterations. Building on textual feedback from LLMs, Revolve simulates higher-order optimization effects, ensuring that adjustments are guided not only by immediate feedback but also by the model’s performance trajectory, leading to faster and more stable optimization without relying on traditional derivative-based methods.
@@ -25,7 +27,6 @@
 pip install REVOLVE
 ```
 
-![Analogy with Torch](assets/method_comparison.png)
 
 ## Method Evaluation
 ### Evaluating Solution Optimization
