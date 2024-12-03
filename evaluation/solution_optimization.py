@@ -7,9 +7,10 @@ import numpy as np
 from dotenv import load_dotenv
 load_dotenv(override=True)
 from statistics import multimode
-
+import time
 import textgrad as tg
 from textgrad.tasks import load_instance_task
+import torch
 
 def config():
     parser = argparse.ArgumentParser(description="Optimize a prompt for a task.")
