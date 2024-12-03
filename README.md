@@ -24,7 +24,7 @@
 
 ## Installation
 ```bash
-pip install REVOLVE
+pip install revolve
 ```
 
 
