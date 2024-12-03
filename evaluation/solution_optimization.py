@@ -10,9 +10,6 @@ from statistics import multimode
 
 import textgrad as tg
 from textgrad.tasks import load_instance_task
-import os
-
-os.environ["OPENAI_API_KEY"] = "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"
 
 def config():
     parser = argparse.ArgumentParser(description="Optimize a prompt for a task.")
