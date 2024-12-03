@@ -46,16 +46,16 @@ python evaluation/solution_optimization.py --task MMLU_CP --engine gpt-4o --num_
 ```
 #### Available Optimization Methods:
 We provide multiple optimization methods for testing:
-- v1: Original TextGrad: Optimizes based on textual feedback.
-- v1_momentum: Momentum-TextGrad: Adjusts optimization steps using feedback trends across iterations.
-- v2: Our REVOLVE method: Tracks response evolution over time for more stable and efficient optimization.
+- v1: Original TextGrad that optimizes based on textual feedback.
+- v1_momentum: Momentum-TextGrad which adjusts optimization steps using feedback trends across iterations.
+- v2: Our REVOLVE method that tracks response evolution over time for more stable and efficient optimization.
 You can use the --optimizer_version flag to select the desired method.
 
 ### Evaluating Prompt Optimization
 
 To evaluate prompt optimization, two LLMs need to be specified:
-- backbone_engine: This is the LLM used by Revolve (or other optimizers) to perform the optimization process.
-- model: This is the LLM on which the prompt is being optimized.
+- --backbone_engine: This is the LLM used by Revolve (or other optimizers) to perform the optimization process.
+- --model: This is the LLM on which the prompt is being optimized.
 For example, we use the gpt-4o as the backbone_engine, using gpt-3.5-turbo as the model:
 - For BBH_object_counting dataset:
 ```
