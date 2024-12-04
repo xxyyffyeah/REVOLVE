@@ -1,18 +1,12 @@
 # REVOLVE: Optimizing AI Systems by Tracking Response Evolution in Textual Optimization
 <!--- BADGES: START --->
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/zou-group/TextGrad/blob/main/examples/notebooks/Prompt-Optimization.ipynb)
 [![GitHub license](https://img.shields.io/badge/License-MIT-blue.svg)][#license-gh-package]
-[![Documentation Status](https://readthedocs.org/projects/textgrad/badge/?version=latest)][#docs-package]
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/textgrad)][#pypi-package]
 [![PyPI](https://img.shields.io/pypi/v/textgrad)][#pypi-package]
-[![Conda - Platform](https://img.shields.io/conda/pn/conda-forge/textgrad?logo=anaconda&style=flat)][#conda-forge-package]
-[![Conda (channel only)](https://img.shields.io/conda/vn/conda-forge/textgrad?logo=anaconda&style=flat&color=orange)][#conda-forge-package]
 
 [#license-gh-package]: https://lbesson.mit-license.org/
 [#arxiv-paper-package]: https://arxiv.org/abs/2406.07496
-[#docs-package]: https://textgrad.readthedocs.io/en/latest/?badge=latest
 [#pypi-package]: https://pypi.org/project/textgrad/
-[#conda-forge-package]: https://anaconda.org/conda-forge/textgrad
 <!--- BADGES: END --->
 
 ## About
