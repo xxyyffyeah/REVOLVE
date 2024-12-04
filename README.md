@@ -1,4 +1,4 @@
-# REVOLVE: Optimizing AI Systems by Tracking Response Evolution in Textual Optimization for More Stable and Effective Progress
+# REVOLVE: Optimizing AI Systems by Tracking Response Evolution in Textual Optimization
 <!--- BADGES: START --->
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/zou-group/TextGrad/blob/main/examples/notebooks/Prompt-Optimization.ipynb)
 [![GitHub license](https://img.shields.io/badge/License-MIT-blue.svg)][#license-gh-package]
@@ -16,7 +16,7 @@
 <!--- BADGES: END --->
 
 ## About
-- This is the code for paper: [REVOLVE: Optimizing AI Systems by Tracking Response Evolution in Textual Optimization for More Stable and Effective Progress](https://arxiv.org/pdf/123456.pdf).
+- This is the code for paper: [REVOLVE: Optimizing AI Systems by Tracking Response Evolution in Textual Optimization](https://arxiv.org/pdf/123456.pdf).
 - REVOLVE is an optimization framework that enhances the stability and efficiency of AI system optimization by tracking the evolution of model responses across iterations. Building on textual feedback from LLMs, Revolve simulates higher-order optimization effects, ensuring that adjustments are guided not only by immediate feedback but also by the model’s performance trajectory, leading to faster and more stable optimization without relying on traditional derivative-based methods.
 - REVOLVE offers an intuitive API, built upon the foundation of [TextGrad] (https://github.com/zou-group/textgrad), that allows users to define custom optimization tasks and loss functions. This makes it an adaptable and effective tool for optimizing LLM-based systems across a range of applications, including prompt optimization, solution refinement, and code optimization.
 
