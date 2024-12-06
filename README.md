@@ -6,12 +6,12 @@
 ![cuda 11.2](https://img.shields.io/badge/cuda-11.2-green.svg)
 
 [#license-gh-package]: https://lbesson.mit-license.org/
-[#arxiv-paper-package]: https://arxiv.org/abs/2406.07496
+[#arxiv-paper-package]: https://arxiv.org/abs/2412.03092/
 [#pypi-package]: https://pypi.org/project/textgrad/
 <!--- BADGES: END --->
 
 ## About
-- This is the code for paper: [REVOLVE: Optimizing AI Systems by Tracking Response Evolution in Textual Optimization](https://arxiv.org/pdf/123456.pdf).
+- This is the code for paper: [REVOLVE: Optimizing AI Systems by Tracking Response Evolution in Textual Optimization](https://arxiv.org/pdf/2412.03092).
 - REVOLVE is an optimization framework that enhances the stability and efficiency of AI system optimization by tracking the evolution of model responses across iterations. Building on textual feedback from LLMs, Revolve simulates higher-order optimization effects, ensuring that adjustments are guided not only by immediate feedback but also by the model’s performance trajectory, leading to faster and more stable optimization without relying on traditional derivative-based methods.
 - REVOLVE offers an intuitive API, built upon the foundation of [TextGrad] (https://github.com/zou-group/textgrad), that allows users to define custom optimization tasks and loss functions. This makes it an adaptable and effective tool for optimizing LLM-based systems across a range of applications, including prompt optimization, solution refinement, and code optimization.
 
@@ -88,4 +88,18 @@ Many existing works greatly inspired this project! Here is a non-exhaustive list
 - 📚 [Micrograd](https://github.com/karpathy/micrograd): A tiny autograd engine greatly inspired our simple design!
 - 📚 [ProTeGi](https://github.com/microsoft/LMOps/tree/main/prompt_optimization): We owe the term "Textual Gradients" to ProTeGi!
 - 📚 [Reflexion](https://github.com/noahshinn/reflexion): A self-reflection that showed us the power of text-based reflection!
-- 📚 [TextGrad](https://github.com/zou-group/textgrad): A Python package that provides a simple interface to implement LLM-“gradients” pipelines for text optimization! 
+- 📚 [TextGrad](https://github.com/zou-group/textgrad): A Python package that provides a simple interface to implement LLM-“gradients” pipelines for text optimization!
+
+
+### Citation
+```bibtex
+@misc{zhang2024revolveoptimizingaisystems,
+      title={Revolve: Optimizing AI Systems by Tracking Response Evolution in Textual Optimization}, 
+      author={Peiyan Zhang and Haibo Jin and Leyang Hu and Xinnuo Li and Liying Kang and Man Luo and Yangqiu Song and Haohan Wang},
+      year={2024},
+      eprint={2412.03092},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2412.03092}, 
+}
+```
