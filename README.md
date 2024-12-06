@@ -7,7 +7,7 @@
 
 [#license-gh-package]: https://lbesson.mit-license.org/
 [#arxiv-paper-package]: https://arxiv.org/abs/2412.03092/
-[#pypi-package]: https://pypi.org/project/textgrad/
+[#pypi-package]: https://pypi.org/project/revolve/
 <!--- BADGES: END --->
 
 ## About
@@ -37,7 +37,7 @@ python evaluation/solution_optimization.py --task MMLU_machine_learning --engine
 ```
 - For MMLU_college_physics dataset:
 ```
-python evaluation/solution_optimization.py --task MMLU_CP --engine gpt-4o --num_threads 10 --optimizer_version v2
+python evaluation/solution_optimization.py --task MMLU_college_physics --engine gpt-4o --num_threads 10 --optimizer_version v2
 ```
 #### Available Optimization Methods:
 We provide multiple optimization methods for testing:
@@ -79,19 +79,17 @@ python -m pip install -e .
 python ./evaluation/code_optimization/leetcode_testtime_with_supervision.py --engine meta-llama/Meta-Llama-3.1-70B-Instruct --optimizer_version v1 (for TextGrad) / v1_momentum (for Momentum-TextGrad) / v2 (for Revolve) --size 200
 ```
 
-## Resources
+## Related Links
 
-### Inspiration
-Many existing works greatly inspired this project! Here is a non-exhaustive list:
-- 📚 [PyTorch](https://github.com/pytorch/pytorch/) The one and only. We owe a ton to PyTorch, hard to do justice here.
-- 📚 [DSPy](https://github.com/stanfordnlp/dspy) is a pioneer in writing LM-based programs in many different ways! Has been a huge inspiration for us.
-- 📚 [Micrograd](https://github.com/karpathy/micrograd): A tiny autograd engine greatly inspired our simple design!
-- 📚 [ProTeGi](https://github.com/microsoft/LMOps/tree/main/prompt_optimization): We owe the term "Textual Gradients" to ProTeGi!
-- 📚 [Reflexion](https://github.com/noahshinn/reflexion): A self-reflection that showed us the power of text-based reflection!
-- 📚 [TextGrad](https://github.com/zou-group/textgrad): A Python package that provides a simple interface to implement LLM-“gradients” pipelines for text optimization!
+This project has been inspired by numerous excellent works! Below is a non-exhaustive list of key references:
+- 📖 [DSPy](https://github.com/stanfordnlp/dspy) A pioneering framework for leveraging LMs in diverse applications, which significantly influenced our approach.
+- 📖 [ProTeGi](https://github.com/microsoft/LMOps/tree/main/prompt_optimization): The term 'Textual Gradients' was inspired by ProTeGi’s prompt optimization methods.
+- 📖 [Reflexion](https://github.com/noahshinn/reflexion): A self-reflection framework that demonstrated the power of text-based reflection in optimization.
+- 📖 [TextGrad](https://github.com/zou-group/textgrad): Laying the foundation for implementing LLM-based "gradient" pipelines, TextGrad offers a streamlined interface for text optimization tasks, which directly contributed to the development of our approach.
 
 
-### Citation
+## BibTeX citation
+If you find our work useful, please consider citing us:
 ```bibtex
 @misc{zhang2024revolveoptimizingaisystems,
       title={Revolve: Optimizing AI Systems by Tracking Response Evolution in Textual Optimization}, 
