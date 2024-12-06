@@ -1,9 +1,10 @@
 # REVOLVE: Optimizing AI Systems by Tracking Response Evolution in Textual Optimization
 <!--- BADGES: START --->
 [![GitHub license](https://img.shields.io/badge/License-MIT-blue.svg)][#license-gh-package]
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/revolve)][#pypi-package]
-[![PyPI](https://img.shields.io/pypi/v/revolve)][#pypi-package]
+[![Arxiv](https://img.shields.io/badge/arXiv-2412.03092-B31B1B.svg)][#arxiv-paper-package]
 ![cuda 11.2](https://img.shields.io/badge/cuda-11.2-green.svg)
+[![PyPI](https://img.shields.io/pypi/v/revolve)][#pypi-package]
+![python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)
 
 [#license-gh-package]: https://lbesson.mit-license.org/
 [#arxiv-paper-package]: https://arxiv.org/abs/2412.03092/
