@@ -1,12 +1,16 @@
 import os
+import sys
 import argparse
 import concurrent
 from dotenv import load_dotenv
 load_dotenv(override=True)
 from tqdm import tqdm
+
+# Add the local textgrad package to sys.path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 import textgrad as tg
 from textgrad.tasks import load_task
-from revolve.optimizer import TextualGradientDescentwithMomentum, TextualGradientDescent_v2
 import numpy as np
 import random
 import json
@@ -125,9 +129,9 @@ model = tg.BlackboxLLM(model_api, system_prompt)
 if args.optimizer_version == "v1":
     optimizer = tg.TextualGradientDescent(engine=llm_api, parameters=[system_prompt])
 elif args.optimizer_version == "v1_momentum":
-    optimizer = TextualGradientDescentwithMomentum(engine=llm_api, parameters=[system_prompt], momentum_window=12)
+    optimizer = tg.optimizer.TextualGradientDescentwithMomentum(engine=llm_api, parameters=[system_prompt], momentum_window=12)
 elif args.optimizer_version == "v2":
-    optimizer = TextualGradientDescent_v2(engine=llm_api, parameters=[system_prompt])
+    optimizer = tg.optimizer.TextualGradientDescent_v2(engine=llm_api, parameters=[system_prompt])
 else:
     raise ValueError(f"Invalid optimizer version: {args.optimizer_version}")
 
