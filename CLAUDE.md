@@ -139,4 +139,6 @@ This project builds upon:
 - Code optimization evaluation requires leetcode-hard-gym to be cloned separately
 - CUDA 11.2+ recommended for optimal performance
 - Python 3.9+ required
+- All codes should be written in English 
+
 EOF < /dev/null
