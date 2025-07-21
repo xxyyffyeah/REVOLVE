@@ -33,6 +33,28 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
             }
+        },
+        {
+            "name": "v1",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/evaluation/prompt_optimization.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--task",
+                "BBH_object_counting",
+                "--backbone_engine",
+                "gpt-4o",
+                "--model",
+                "gpt-3.5-turbo",
+                "--num_threads",
+                "10",
+                "--optimizer_version",
+                "v1"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
         }
     ]
 }
